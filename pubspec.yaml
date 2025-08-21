@@ -2,6 +2,13 @@ name: dartora
 description: A large utility package.
 version: 0.1.0
 repository: https://github.com/Officer-Erik-1K-88/dartora
+issue_tracker: https://github.com/Officer-Erik-1K-88/dartora/issues
+
+topics:
+  - utilities
+  - utility
+  - utils
+  - dart
 
 environment:
   sdk: ^3.8.1
