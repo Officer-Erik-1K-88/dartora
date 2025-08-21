@@ -1,7 +1,7 @@
 name: dartora
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+description: A large utility package.
+version: 0.1.0
+repository: https://github.com/Officer-Erik-1K-88/dartora
 
 environment:
   sdk: ^3.8.1
