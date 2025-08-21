@@ -6,7 +6,9 @@ _Defined in: `src/math/advanced/matrix.dart`_
 
 _Import_: `package:dartora/math/advanced/matrix.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -456,7 +458,7 @@ _Import_: `package:dartora/math/advanced/matrix.dart`
 
 ### Methods
 
-#### `factory Matrix(List\<List\<num\>\> matrix) {`
+#### `factory Matrix(List<List<num>> matrix) {`
 
 
 
@@ -473,7 +475,7 @@ _Import_: `package:dartora/math/advanced/matrix.dart`
 
 
 
-#### `if (actualIndex \>= row.length) {`
+#### `if (actualIndex >= row.length) {`
 
 
 

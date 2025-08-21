@@ -11,7 +11,9 @@ _Defined in: `src/math/basic/log.dart`_
 
 _Import_: `package:dartora/math/basic/log.dart`
 
+
 ---
+
 
 ### Signature
 

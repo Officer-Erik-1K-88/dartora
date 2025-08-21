@@ -6,7 +6,9 @@ _Defined in: `src/collections/iterators.dart`_
 
 _Import_: `package:dartora/collections/iterators.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -49,6 +51,6 @@ _Import_: `package:dartora/collections/iterators.dart`
 
 
 
-#### `if (_innerIndex \>= _outer.length) {`
+#### `if (_innerIndex >= _outer.length) {`
 
 

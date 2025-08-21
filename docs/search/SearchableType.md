@@ -6,7 +6,9 @@ _Defined in: `src/search/searchable.dart`_
 
 _Import_: `package:dartora/search/searchable.dart`
 
+
 ---
+
 
 ### Members
 

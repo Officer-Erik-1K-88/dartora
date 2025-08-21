@@ -6,7 +6,9 @@ _Defined in: `src/collections/iteration.dart`_
 
 _Import_: `package:dartora/collections/iteration.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -15,7 +17,7 @@ _Import_: `package:dartora/collections/iteration.dart`
 
 
 
-#### `_keys.map((key) =\> MapEntry(key, _map[key] as V));`
+#### `_keys.map((key) => MapEntry(key, _map[key] as V));`
 
 
 
@@ -55,7 +57,7 @@ _Import_: `package:dartora/collections/iteration.dart`
 
 
 
-#### `_map.removeWhere((key, val) =\> keys.contains(key));`
+#### `_map.removeWhere((key, val) => keys.contains(key));`
 
 
 
@@ -73,11 +75,11 @@ _Import_: `package:dartora/collections/iteration.dart`
 
 ### Fields
 
-#### `final Map\<K, V\> _map;`
+#### `final Map<K, V> _map;`
 
 
 
-#### `final List\<K\> _keys;`
+#### `final List<K> _keys;`
 
 
 
@@ -127,7 +129,7 @@ _Import_: `package:dartora/collections/iteration.dart`
 
 
 
-#### `if (i \> -1 && index \> i) {`
+#### `if (i > -1 && index > i) {`
 
 
 

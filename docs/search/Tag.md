@@ -1,75 +1,12 @@
-# Tag
+# Tag<E>
 
-_No summary provided in source._
+Named value that can behave as a boolean tag or a generic key→value.
 
-_Defined in: `src/search/tag.dart`_
+- **`name : String`** — tag key.
+- **`value : E`** — data; must be `bool` when `isTag == true`.
+- **`isTag : bool`** — if true, the tag participates in `#tag` search and `value` is a boolean toggle.
+- **`searchString : String?`** — optional override used for search text.
 
-_Import_: `package:dartora/search/tag.dart`
-
----
-
-### Constructors
-
-#### `assert(E is bool? isTag: true)
-  ;`
-
-
-
-#### `if (searchString != null) return searchString!(this);`
-
-
-
-#### `return value.toString();`
-
-
-
-### Fields
-
-#### `final String name;`
-
-
-
-#### `E value;`
-
-
-
-#### `final bool isTag;`
-
-
-
-#### `searchString;`
-
-
-
-#### `value;`
-
-
-
-#### `as E;`
-
-
-
-#### `oldV;`
-
-
-
-#### `return name;`
-
-
-
-
-
-### Methods
-
-#### `bool toggle() {`
-
-
-
-#### `if (isTag) {`
-
-
-
-#### `override
-  String toString() {`
-
-
+### Behavior
+- `toggle()` flips a boolean tag and reports if it changed.
+- `toString()` returns `searchString` if set, else a stringified representation suitable for search text.

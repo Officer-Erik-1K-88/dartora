@@ -13,9 +13,7 @@ and the Flutter guide for
 
 # Dartora
 
-This is a package that was built to put multiple functionalities in one place.
-
-A large, batteries‑included utility package for Dart. It provides:
+A, batteries‑included utility package, that was built for Dart. It provides:
 
 - **Collections**: ordered maps, multi‑view/large lists, rich iteration utilities.
 - **Search**: a lightweight query engine with tags, required/forbidden terms, wildcards, and scoring.
@@ -25,11 +23,6 @@ A large, batteries‑included utility package for Dart. It provides:
 ---
 
 ## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-### Installation
 
 Add **dartora** to your project:
 
@@ -56,7 +49,9 @@ import 'package:dartora/util.dart';
 
 We added many different types of collections in.
 
-- **Iteration** primitives: `IterationBase`, `IterationHolder`, `IterationItem`, iterators.
+- **Iteration** primitives: `IterationConstruct<E>`, `Iteration<E>`, `IterationBase<E>`, `IterationMap<K, V>`.
+- **Iteration** defined: `IterationItem<E>`, `IterationList<E>`, `IterationHolder<E>`, `IterationItemMap<K, V>`.
+- **Iterators**: `IteratorBuild<E>`, `IndexBaseIterator<E>`, `HolderIterator<E>`.
 - **Lists**: `MultiViewList<E>`, `LargeList<E>`, `IterableItems<E>`.
 - **Maps**: `OrderedMap<K,V>` – insertion‑ordered map with stable key order.
 
@@ -75,26 +70,6 @@ for (final k in omap.keys) {
 ```
 
 `MultiViewList` and `LargeList` help you present slices/views over large datasets without copying.
-
-### Math
-
-We added several new mathematical computations in.
-
-- **Basic**: `round(...)` + `RoundMode`, `root`, `log` helpers, `comparison` utilities.
-- **Advanced**: `Points` (scoring), `Matrix`, `Curves`, `BaseRadix`, `Points` collection helpers.
-- **Constants**: common numeric constants.
-
-#### deterministic rounding
-
-```dart
-import 'package:dartora/math.dart';
-
-final a = round(2.34567, decimals: 2);                // 2.35 (default: halfUp)
-final b = round(2.5, mode: RoundMode.halfEven);       // 2.0 → banker's rounding
-final c = round(-3.5, mode: RoundMode.halfAwayFrom);  // -4.0 → away from zero
-```
-
-**Available modes** (see `RoundMode`): `halfUp`, `halfEven`, `halfOdd`, `halfAwayFrom`, `halfToZero`, `awayFrom`, `alwaysToZero`.
 
 ### Search
 
@@ -147,7 +122,27 @@ for (final si in results) {
 | `\` | Escape next special token | e.g. `\#literal` |
 | space | Splits terms | terms are scored individually |
 
-The engine produces a `SearchQuery` with **optional**, **required**, and **cannot** groups, and computes a `SearchQueryComparison` with a `Points` score. Use `Search.validityCheck`/`itemCheck` to filter invalid hits.
+The engine produces a `SearchQuery` with **optional**, **required**, **cannot** and **tag** groups, and computes a `SearchQueryComparison` with a `Points` score. Use `Search.validityCheck`/`itemCheck` to filter invalid hits.
+
+### Math
+
+We added several new mathematical computations in.
+
+- **Basic**: `round(...)` + `RoundMode`, `root`, `log` helpers, `comparison` utilities.
+- **Advanced**: `Points` (scoring), `Matrix`, `curves`, `BaseRadix`, `Points` collection helpers.
+- **Constants**: common numeric constants.
+
+#### deterministic rounding
+
+```dart
+import 'package:dartora/math.dart';
+
+final a = round(2.34567, decimals: 2);                // 2.35 (default: halfUp)
+final b = round(2.5, mode: RoundMode.halfEven);       // 2.0 → banker's rounding
+final c = round(-3.5, mode: RoundMode.halfAwayFrom);  // -4.0 → away from zero
+```
+
+**Available modes** (see `RoundMode`): `halfUp`, `halfEven`, `halfOdd`, `halfAwayFrom`, `halfToZero`, `awayFrom`, `alwaysToZero`.
 
 ### Util
 
@@ -161,11 +156,9 @@ were built because of this package.
 
 ## Usage
 
-- All top‑level entry points (`dartora.dart`, `collections.dart`, `search.dart`, `math.dart`, `util.dart`) re‑export stable APIs from `lib/src/...`.
-- For search, you can customize the parser by supplying your own `QueryEngine(patternItems: [...])`.
-- `RoundMode` is fully configurable: you can construct custom modes (even/odd/zero/away, thresholds, reversal, etc.).
-
 ### Custom search syntax
+
+For search, you can customize the parser by supplying your own `QueryEngine(patternItems: [...])`.
 
 ```dart
 final engine = QueryEngine(patternItems: const [
@@ -180,6 +173,8 @@ final query = SearchQuery.from('ice -hot #dessert', engine: engine);
 ```
 
 ### Custom rounding mode
+
+`RoundMode` is fully configurable: you can construct custom modes (even/odd/zero/away, thresholds, reversal, etc.).
 
 ```dart
 const bankerTowardZero = RoundMode(
@@ -202,7 +197,7 @@ final v = round(12.55, decimals: 1, mode: bankerTowardZero);
 
 - Open issues/PRs with reproducible cases.
 - Keep public APIs documented; prefer small, composable utilities.
-- Tests are appreciated for math edge cases and search parsing.
+- Tests are appreciated for edge cases.
 
 ### License
 

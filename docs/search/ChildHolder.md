@@ -6,7 +6,9 @@ _Defined in: `src/search/searchable.dart`_
 
 _Import_: `package:dartora/search/searchable.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -18,7 +20,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `return _typedKeys.putIfAbsent(type, () =\> MultiViewList\<String\>(source:[]));`
+#### `return _typedKeys.putIfAbsent(type, () => MultiViewList<String>(source:[]));`
 
 
 
@@ -259,11 +261,11 @@ _Import_: `package:dartora/search/searchable.dart`
 
 ### Methods
 
-#### `ChildActionResult\<T\> _callAction(Child\<T\> target, ChildActionType type) {`
+#### `ChildActionResult<T> _callAction(Child<T> target, ChildActionType type) {`
 
 
 
-#### `MultiViewList\<String\> _getKeys(SearchableType type) {`
+#### `MultiViewList<String> _getKeys(SearchableType type) {`
 
 
 
@@ -275,7 +277,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `UnmodifiableListView\<String\> getKeys(SearchableType type) {`
+#### `UnmodifiableListView<String> getKeys(SearchableType type) {`
 
 
 
@@ -300,11 +302,11 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 #### `override
-  Child\<T\> elementAt(int index) {`
+  Child<T> elementAt(int index) {`
 
 
 
-#### `Child\<T\> add(T item) {`
+#### `Child<T> add(T item) {`
 
 
 
@@ -316,7 +318,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `void addAll(List\<T\> items) {`
+#### `void addAll(List<T> items) {`
 
 
 
@@ -332,7 +334,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `bool removeElement(Child\<T\> child) {`
+#### `bool removeElement(Child<T> child) {`
 
 
 
@@ -341,7 +343,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 #### `override
-  void forEach(void Function(Child\<T\> child) action) {`
+  void forEach(void Function(Child<T> child) action) {`
 
 
 
@@ -349,7 +351,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `FT Function(FT previousValue, Child\<T\> child) combine) {`
+#### `FT Function(FT previousValue, Child<T> child) combine) {`
 
 
 
@@ -358,7 +360,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 #### `override
-  bool any(bool Function(Child\<T\> element) test) {`
+  bool any(bool Function(Child<T> element) test) {`
 
 
 
@@ -368,15 +370,15 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 #### `override
-  bool every(bool Function(Child\<T\> element) test) {`
+  bool every(bool Function(Child<T> element) test) {`
 
 
 
-#### `Iterable\<ET\> Function(Child\<T\> element) toElements) {`
+#### `Iterable<ET> Function(Child<T> element) toElements) {`
 
 
 
-#### `followedBy(Iterable\<Child\<T\>\> other) {`
+#### `followedBy(Iterable<Child<T>> other) {`
 
 
 
@@ -385,12 +387,12 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `MT Function(Child\<T\> e) toElement) {`
+#### `MT Function(Child<T> e) toElement) {`
 
 
 
 #### `override
-  Child\<T\> reduce(Child\<T\> Function(Child\<T\> value, Child\<T\> element) combine) {`
+  Child<T> reduce(Child<T> Function(Child<T> value, Child<T> element) combine) {`
 
 
 
@@ -398,7 +400,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `skipWhile(bool Function(Child\<T\> value) test) {`
+#### `skipWhile(bool Function(Child<T> value) test) {`
 
 
 
@@ -406,7 +408,7 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `takeWhile(bool Function(Child\<T\> value) test) {`
+#### `takeWhile(bool Function(Child<T> value) test) {`
 
 
 
@@ -414,6 +416,6 @@ _Import_: `package:dartora/search/searchable.dart`
 
 
 
-#### `where(bool Function(Child\<T\> element) test) {`
+#### `where(bool Function(Child<T> element) test) {`
 
 

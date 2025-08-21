@@ -6,7 +6,9 @@ _Defined in: `src/math/advanced/base_radix.dart`_
 
 _Import_: `package:dartora/math/advanced/base_radix.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -179,11 +181,11 @@ _Import_: `package:dartora/math/advanced/base_radix.dart`
 
 
 
-#### `assert(resolution \>= 0);`
+#### `assert(resolution >= 0);`
 
 
 
-#### `assert(radix \>= 2 && radix \<= 36);`
+#### `assert(radix >= 2 && radix <= 36);`
 
 
 
@@ -219,11 +221,11 @@ _Import_: `package:dartora/math/advanced/base_radix.dart`
 
 
 
-#### `assert(resolution \>= 0);`
+#### `assert(resolution >= 0);`
 
 
 
-#### `assert(radix \>= 2 && radix \<= 36);`
+#### `assert(radix >= 2 && radix <= 36);`
 
 
 
@@ -243,7 +245,7 @@ _Import_: `package:dartora/math/advanced/base_radix.dart`
 
 
 
-#### `assert(index \< radix);`
+#### `assert(index < radix);`
 
 
 
@@ -251,7 +253,7 @@ _Import_: `package:dartora/math/advanced/base_radix.dart`
 
 
 
-#### `if (count \> 0) number = number * pow(10, count);`
+#### `if (count > 0) number = number * pow(10, count);`
 
 
 
@@ -400,11 +402,11 @@ _Import_: `package:dartora/math/advanced/base_radix.dart`
 
 
 
-#### `if (calcPart \< radix) {`
+#### `if (calcPart < radix) {`
 
 
 
-#### `if (resolution \> 0) {`
+#### `if (resolution > 0) {`
 
 
 

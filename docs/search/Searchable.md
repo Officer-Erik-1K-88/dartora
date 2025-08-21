@@ -1,65 +1,14 @@
 # Searchable
 
-_No summary provided in source._
+Abstract entity that can be searched.
 
-_Defined in: `src/search/searchable.dart`_
+- **`id : String`** — unique id.
+- **`name : String`** — permanent name.
+- **`title : String`** — display name (used in search).
+- **`description : String`** — body text (used in search).
+- **`tags : Tags`** — tag/value map.
+- **`type : SearchableType`** — `parent` or `child` (hierarchy support).
+- **`children : List<Searchable>`** — (optional) nested items.
 
-_Import_: `package:dartora/search/searchable.dart`
-
----
-
-### Constructors
-
-#### `return DefaultSearchable(
-      id: id,
-      name: name,
-      type: type,
-      description: description,
-      title: title,
-      tags: tags,
-      children: children,
-      onHolderEvent: onHolderEvent,
-    );`
-
-
-
-### Fields
-
-#### `final String id;`
-
-
-
-#### `String get name;`
-
-
-
-#### `String title;`
-
-
-
-#### `String description;`
-
-
-
-#### `final Tags tags;`
-
-
-
-#### `final SearchableType type;`
-
-
-
-#### `_parent;`
-
-
-
-#### `_parent;`
-
-
-
-#### `ChildHolder get children;`
-
-
-
-
-
+### DefaultSearchable
+Concrete implementation with convenient constructors; suitable for most apps.

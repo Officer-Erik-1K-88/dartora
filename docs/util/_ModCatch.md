@@ -6,11 +6,33 @@ _Defined in: `src/modification.dart`_
 
 _Import_: `package:dartora/modification.dart`
 
+
 ---
+
 
 ### Constructors
 
 #### `action(this);`
+
+
+
+#### `const ModLevel();`
+
+
+
+#### `return ModificationAction(listener: this, level: c.level);`
+
+
+
+#### `_catches.add(_buildCatch(_catches.length));`
+
+
+
+#### `last.step(action);`
+
+
+
+#### `onReset(this, beenModified?ModResetType.modified:ModResetType.unmodified);`
 
 
 
@@ -52,6 +74,34 @@ _Import_: `package:dartora/modification.dart`
 
 
 
+#### `one;`
+
+
+
+#### `index;`
+
+
+
+#### `onReset;`
+
+
+
+#### `isNotEmpty;`
+
+
+
+#### `_modCount;`
+
+
+
+#### `return false;`
+
+
+
+#### `_points;`
+
+
+
 
 
 ### Methods
@@ -71,5 +121,53 @@ _Import_: `package:dartora/modification.dart`
 
 
 #### `if (!_ended) {`
+
+
+
+#### `ModLevel getModLevelAt(int index) {`
+
+
+
+#### `_ModCatch _buildCatch(int level) {`
+
+
+
+#### `return _ModCatch(level: getModLevelAt(level), checker: (c) {`
+
+
+
+#### `void start() {`
+
+
+
+#### `if (_catches.length != ModLevel.values.length) {`
+
+
+
+#### `bool step(bool Function(ModificationAction) action) {`
+
+
+
+#### `if (inModification) {`
+
+
+
+#### `void end() {`
+
+
+
+#### `if (inModification) {`
+
+
+
+#### `removeLast().end((c) {`
+
+
+
+#### `void reset() {`
+
+
+
+#### `if (!inModification) {`
 
 

@@ -1,8 +1,11 @@
 # Dartora Documentation
 
-Comprehensive API reference that was auto generated from source. Each class/function has its own page.
+This is an **inferred, in‑depth** API reference generated from source code. It includes summaries even for items lacking doc comments.
+
+
 
 ## Table of Contents
+
 
 ### Collections
 
@@ -70,6 +73,7 @@ Comprehensive API reference that was auto generated from source. Each class/func
   - [logB](math/_functions/logB.md)
   - [nthRoot](math/_functions/nthRoot.md)
   - [pow](math/_functions/pow.md)
+  - [round](math/_functions/round.md)
   - [s](math/_functions/s.md)
   - [sqrt](math/_functions/sqrt.md)
   - [toDouble](math/_functions/toDouble.md)
@@ -85,5 +89,3 @@ Comprehensive API reference that was auto generated from source. Each class/func
 - [ModLevel](util/ModLevel.md)
 - [ModResetType](util/ModResetType.md)
 - [TypeException](util/TypeException.md)
-
-### Misc

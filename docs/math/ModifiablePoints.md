@@ -6,7 +6,9 @@ _Defined in: `src/math/advanced/points.dart`_
 
 _Import_: `package:dartora/math/advanced/points.dart`
 
+
 ---
+
 
 ### Constructors
 
@@ -14,11 +16,11 @@ _Import_: `package:dartora/math/advanced/points.dart`
 
 
 
-#### `assert(count \> 0);`
+#### `assert(count > 0);`
 
 
 
-#### `assert(occurrence \>= 0);`
+#### `assert(occurrence >= 0);`
 
 
 
@@ -26,7 +28,7 @@ _Import_: `package:dartora/math/advanced/points.dart`
 
 
 
-#### `assert(count \> 0);`
+#### `assert(count > 0);`
 
 
 

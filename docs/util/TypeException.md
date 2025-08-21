@@ -1,23 +1,3 @@
 # TypeException
 
-_No summary provided in source._
-
-_Defined in: `src/errors.dart`_
-
-_Import_: `package:dartora/errors.dart`
-
----
-
-
-### Fields
-
-#### `object;`
-
-
-
-#### `final List\<Type\> types;`
-
-
-
-
-
+Thrown when an object does not match any of the allowed `types`. Extends `BaseException` and includes the offending `obj` for diagnostics.

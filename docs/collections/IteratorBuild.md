@@ -6,11 +6,29 @@ _Defined in: `src/collections/iterators.dart`_
 
 _Import_: `package:dartora/collections/iterators.dart`
 
+
 ---
+
 
 ### Constructors
 
 #### `elementAt(_index);`
+
+
+
+#### `super(
+      elementAt: iterable.elementAt,
+      endIndex: iterable.length
+    )
+  ;`
+
+
+
+#### `_holder.elementAt(_outerIndex);`
+
+
+
+#### `_outer.elementAt(_innerIndex);`
 
 
 
@@ -36,6 +54,26 @@ _Import_: `package:dartora/collections/iterators.dart`
 
 
 
+#### `_holder;`
+
+
+
+#### `holder;`
+
+
+
+#### `return false;`
+
+
+
+#### `return false;`
+
+
+
+#### `return true;`
+
+
+
 
 
 ### Methods
@@ -46,5 +84,14 @@ _Import_: `package:dartora/collections/iterators.dart`
 
 
 #### `if (_index == -1) {`
+
+
+
+#### `override
+  bool moveNext() {`
+
+
+
+#### `if (_innerIndex >= _outer.length) {`
 
 
