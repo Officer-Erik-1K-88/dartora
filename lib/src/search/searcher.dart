@@ -2,10 +2,11 @@ import '../../collections.dart';
 import '../../math.dart' as math;
 import 'searchable.dart';
 
-// Search engine stuff below
-
+/// Defines the [Searchable] item
+/// that was found in [Search].
 class SearchItem {
-  /// Display title.
+  /// The route to this [item] in it's
+  /// storage location.
   String? titleChan;
   /// The actual item that was searched for.
   final Searchable item;
@@ -18,12 +19,23 @@ class SearchItem {
   });
 }
 
+/// Defines some search keyword.
 class PointedWord {
+  /// The text that should be looked for.
   final String word;
+  /// The reward for finding [word] in
+  /// the search.
+  ///
+  /// Should be positive when [word] is wanted.
+  /// Should be negative when the [word] is not wanted.
+  /// And should be zero when the [word] doesn't matter.
   final int points;
 
   PointedWord({required this.word, required this.points});
 
+  /// A string representation of this object.
+  ///
+  /// The return is [word].
   @override
   String toString() {
     return word;
@@ -40,10 +52,14 @@ enum QueryType {
   all,
 }
 
+/// The comparison between the [SearchQuery] and
+/// some [Searchable].
 class SearchQueryComparison {
   /// The number of points that was got in comparison.
   final math.Points points;
+  /// Wether the [Searchable] in [SearchItem] has the required [PointedWord]s.
   final bool hasRequired;
+  /// Wether the [Searchable] in [SearchItem] has the [PointedWord]s that are not allowed.
   final bool containsNotAllowed;
 
   const SearchQueryComparison({
@@ -52,6 +68,8 @@ class SearchQueryComparison {
     required this.containsNotAllowed,
   });
 
+  /// For when needing to combine another [SearchQueryComparison]
+  /// into this one.
   SearchQueryComparison operator +(SearchQueryComparison other) {
     return SearchQueryComparison(
       points: points + other.points,
@@ -61,30 +79,109 @@ class SearchQueryComparison {
   }
 }
 
-enum PatternItem {
-  ignore('Ignore Special', 0x005C), // \
-  hold('Mention', 0x0022), // "
-  space('Space', 0x0020), // space
-  cannotHave('Cannot Mention', 0x002D), // -
-  tag('Tag', 0x0023), // #
-  wild('Wildcard', 0x002A, ' @-Wild- ', r'.'), // *
-  ;
-
-  const PatternItem(
-    this.name,
-    this.charCode,
-    [
-      this.charReplacement,
-      this.regExpChar,
-    ]
-  ):
+/// Defines some pattern that should
+/// have some sort of special handling.
+class PatternItem {
+  const PatternItem({
+    required this.name,
+    required this.charCode,
+    this.charReplacement,
+    this.regExpChar,
+    this.isCollector = false,
+    this.ignoreNextPattern = false,
+    this.ignoreNextChar = false,
+    this.isSplitter = false,
+    this.definesTag = false,
+    this.definesRequired = false,
+    this.definesNotAllowed = false,
+  }):
+    assert(isCollector? !(ignoreNextPattern || ignoreNextChar || isSplitter) : true),
+    assert(ignoreNextPattern || ignoreNextChar || isSplitter ?
+      (isCollector ? 1 : 0) +
+      (ignoreNextPattern ? 1 : 0) +
+      (ignoreNextChar ? 1 : 0) +
+      (isSplitter ? 1 : 0) +
+      (definesTag ? 1 : 0) +
+      (definesRequired ? 1 : 0) +
+      (definesNotAllowed ? 1 : 0)
+      == 1 : true,
+    ),
+    isSpecial = isCollector || ignoreNextPattern || ignoreNextChar || isSplitter || definesTag || definesRequired || definesNotAllowed,
     expBound = charReplacement != null && regExpChar != null
   ;
+
+  /// What to refer this pattern as.
   final String name;
+  /// The pattern to this [PatternItem].
   final int charCode;
+  /// Defines some char to replace [charCode]
+  /// when inserting this pattern into a
+  /// [PointedWord].
+  ///
+  /// This value is ignored when [isSpecial] is
+  /// true. However, this value is used if this
+  /// pattern is found while in a [isCollector].
   final String? charReplacement;
+  /// The regular expression value pattern
+  /// to replace this pattern with.
+  ///
+  /// This value is ignored when [expBound]
+  /// is false.
   final String? regExpChar;
+  /// Defines that this pattern should
+  /// replace all [charReplacement]s with
+  /// [regExpChar] when [QueryEngine.getExpression]
+  /// is called.
   final bool expBound;
+
+  /// Defines that this pattern is the
+  /// start and end block of a collector.
+  ///
+  /// A collector is something used to collect
+  /// a block of text. In this block of text,
+  /// most patterns are ignored.
+  ///
+  /// The patterns that are not ignored are the
+  /// ones that are defined as [ignoreNextPattern]
+  /// or [ignoreNextChar].
+  /// However, the patterns that define a [charReplacement]
+  /// will have that inserted instead of [charCode].
+  final bool isCollector;
+
+  /// Defines that the next character
+  /// should be ignored for all potential processing
+  /// and should be placed into a text block.
+  ///
+  /// This can be used inside of an [isCollector].
+  final bool ignoreNextPattern;
+
+  /// Defines that the next character
+  /// should be ignored for all potential processing
+  /// and should not be placed into a text block.
+  ///
+  /// This can be used inside of an [isCollector].
+  final bool ignoreNextChar;
+
+  /// Signals the end of some text block
+  /// that will be put as a [PointedWord].
+  final bool isSplitter;
+
+  /// Defines that text that comes after this pattern
+  /// should be set to [SearchQuery.tags].
+  final bool definesTag;
+
+  /// Defines that text that comes after this pattern
+  /// should be set to [SearchQuery.require].
+  final bool definesRequired;
+
+  /// Defines that text that comes after this pattern
+  /// should be set to [SearchQuery.cannot].
+  final bool definesNotAllowed;
+
+  /// Defines that, during [QueryBuilder]'s
+  /// build process, there is some special
+  /// handling that will take place.
+  final bool isSpecial;
 
   String call({
     void Function(PatternItem)? action,
@@ -97,110 +194,350 @@ enum PatternItem {
     return String.fromCharCode(charCode);
   }
 
-  static Map<int, PatternItem> _patternItems = { for (var elm in PatternItem.values) elm.charCode : elm };
-
-  static PatternItem? fromCharCode(final int charCode) {
-    return _patternItems[charCode];
+  @override
+  bool operator ==(Object other) {
+    return other is PatternItem &&
+    charCode == other.charCode &&
+    expBound == other.expBound;
   }
+
+  @override
+  int get hashCode => Object.hash(charCode, expBound);
+
+  // Prebuilt:
+
+  /// The ignore [PatternItem] is used to ignore
+  /// the the proceeding [PatternItem] using `\`.
+  static const PatternItem ignore = PatternItem(
+    name: 'Ignore Special',
+    charCode: 0x005C,
+    ignoreNextPattern: true,
+  );
+  /// The hold [PatternItem] is used to define
+  /// a collector that uses `"` as it's pattern
+  /// and defaults to putting the block of text
+  /// between two `"` should be required.
+  static const PatternItem hold = PatternItem(
+    name: 'Mention',
+    charCode: 0x0022,
+    isCollector: true,
+    definesRequired: true,
+  );
+  /// The space [PatternItem] is used to define
+  /// that the a space is a splitter.
+  static const PatternItem space = PatternItem(
+    name: 'Space',
+    charCode: 0x0020,
+    isSplitter: true,
+  );
+  /// The cannot have [PatternItem] is used to define
+  /// that some text the proceeds it should be not allowed.
+  /// Uses `-` as it's pattern.
+  static const PatternItem cannotHave = PatternItem(
+    name: 'Cannot Mention',
+    charCode: 0x002D, // -
+    definesNotAllowed: true,
+  );
+  /// The tag [PatternItem] is used to define
+  /// that some text the proceeds it should be a tag.
+  /// Uses `#` as it's pattern.
+  static const PatternItem tag = PatternItem(
+    name: 'Tag',
+    charCode: 0x0023,
+    definesTag: true,
+  );
+  /// the wild [PatternItem] is used to define
+  /// that the regular expression wildcard
+  /// should be used at this position in
+  /// the search text.
+  static const PatternItem wild = PatternItem(
+    name: 'Wildcard',
+    charCode: 0x002A, // *
+    charReplacement: ' @-Wild- ',
+    regExpChar: r'.',
+  );
 }
 
-class SearchQuery extends Iteration<PointedWord> {
-  factory SearchQuery.from(
-    String query,
-    {
-      int defaultPoints=1,
-    }
-  ) {
-    List<PointedWord> optional = [];
-    List<PointedWord> cannot = [];
-    List<PointedWord> require = [];
-    List<PointedWord> tags = [];
+class QueryBuilder {
+  QueryBuilder();
 
-    bool ignoreSpecial = false;
-    bool add = true;
-    String current = '';
-    bool inHold = false;
-    bool asTag = false;
+  /// Wether to ignore a [PatternItem].
+  bool ignoreSpecial = false;
+  /// Wether to ignore a call to [onChar].
+  bool ignoreChar = false;
+  /// Wether [current] should be appended to
+  /// [optional] or [require] when true. Or,
+  /// when false, to append to [cannot].
+  bool add = true;
+  /// The current [PatternItem] that
+  /// has [PatternItem.isCollector] set to
+  /// true.
+  PatternItem? holdItem;
+  /// Wether the build process is holding
+  /// back on executions for [PatternItem]s.
+  bool get inHold => holdItem != null;
+  /// Defines that if [add] then append to [require].
+  bool asRequired = false;
+  /// Wether [current] should be appended to
+  /// [tag] when true. Or, when false,
+  /// to follow what [add] is.
+  bool asTag = false;
 
-    void append() {
-      if (current.isNotEmpty) {
-        var point = PointedWord(
-          word: current,
-          points: add?defaultPoints:-defaultPoints,
-        );
-        if (asTag) {
-          tags.add(point);
-        } else if (add) {
-          if (inHold) {
-            require.add(point);
-          } else {
-            optional.add(point);
-          }
+  /// Wether to add the char that was processed by
+  /// [onChar] to [current].
+  bool toCurrent = true;
+  /// The currently defined text block
+  /// that will be set to a [PointedWord]
+  /// in [append].
+  String current = '';
+  /// The [PointedWord]s of a query
+  /// that are defined as wanted,
+  /// but not needed.
+  List<PointedWord> optional = [];
+  /// The [PointedWord]s of a query
+  /// that are defined as not allowed.
+  List<PointedWord> cannot = [];
+  /// The [PointedWord]s of a query
+  /// that are defined as needed.
+  List<PointedWord> require = [];
+  /// The [PointedWord]s of a query
+  /// that are defined as tags.
+  List<PointedWord> tags = [];
+
+  /// Clears all fields on this class
+  /// and sets them back to default values.
+  void reset() {
+    ignoreSpecial = false;
+    ignoreChar = false;
+    add = true;
+    holdItem = null;
+    asTag = false;
+    asRequired = false;
+
+    toCurrent = true;
+    current = '';
+    optional = [];
+    cannot = [];
+    require = [];
+    tags = [];
+  }
+
+  void append(QueryEngine engine) {
+    if (current.isNotEmpty) {
+      var point = PointedWord(
+        word: current,
+        points: add?engine.defaultPoints:-engine.defaultPoints,
+      );
+      if (asTag) {
+        tags.add(point);
+      } else if (add) {
+        if (asRequired) {
+          require.add(point);
         } else {
-          cannot.add(point);
+          optional.add(point);
         }
+      } else {
+        cannot.add(point);
       }
-      asTag = false;
-      add = true;
-      current = '';
     }
+    asTag = false;
+    asRequired = false;
+    add = true;
+    current = '';
+  }
 
-    for (int charCode in query.codeUnits) {
-      bool isContinue = false;
-      String charInsert = PatternItem.fromCharCode(charCode)?.call(
-        action: (pat) {
-          if (pat == PatternItem.ignore) {
-            ignoreSpecial = true;
-            isContinue = true;
-          } else if (pat == PatternItem.hold) {
-            if (inHold) {
-              append();
-            }
-            inHold = !inHold;
-            isContinue = true;
-          } else if (pat == PatternItem.space) {
-            append();
-            isContinue = true;
-          } else if (pat == PatternItem.cannotHave) {
-            add = false;
-            isContinue = true;
-          } else if (pat == PatternItem.tag) {
-            asTag = true;
-            isContinue = true;
-          }
-        },
-        check: (pat) {
-          if (ignoreSpecial) return false;
-          if (inHold && pat != PatternItem.ignore) {
-            return false;
-          }
-          return true;
-        },
-      ) ?? String.fromCharCode(charCode);
-      if (isContinue) continue;
+  /// Handles the processing of [pat].
+  void action(QueryEngine engine, PatternItem pat) {
+    if (pat.ignoreNextChar) {
+      ignoreChar = true;
+    } else if (pat.ignoreNextPattern) {
+      ignoreSpecial = true;
+    } else if (pat.isCollector) {
+      if (inHold) {
+        append(engine);
+        holdItem = null;
+      } else {
+        holdItem = pat;
+      }
+    } else if (pat.isSplitter) {
+      append(engine);
+    }
+    if (pat.definesNotAllowed) {
+      add = false;
+    } else if (pat.definesTag) {
+      asTag = true;
+    }  else if (pat.definesRequired) {
+      asRequired = true;
+    }
+    if (pat.isSpecial) {
+      toCurrent = false;
+    }
+  }
+
+  /// Checks to see if [action] should be
+  /// called for [pat].
+  bool check(PatternItem pat) {
+    if (ignoreSpecial) return false;
+    if (
+      inHold &&
+      !(
+        pat.ignoreNextPattern ||
+        pat.ignoreNextChar ||
+        holdItem == pat
+      )
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  /// Executes functionality processing on each [charCode]
+  /// provided to [call].
+  void onChar({
+    required QueryEngine engine,
+    required int charCode,
+  }) {
+    toCurrent = true;
+    if (ignoreChar) {
+      ignoreChar = false;
+      return;
+    }
+    PatternItem? pat = engine.fromCharCode(charCode);
+    String charInsert = String.fromCharCode(charCode);
+    if (pat != null) {
+      if (pat.charReplacement != null) {
+        charInsert = pat.charReplacement!;
+      }
+      if (check(pat)) {
+        action(engine, pat);
+      }
+    }
+    if (toCurrent) {
       current = '$current$charInsert';
       ignoreSpecial = false;
     }
-    append();
+  }
+
+  /// Builds a [SearchQuery] with the settings from [engine]
+  /// and the query defined from [queryCodeUnits].
+  SearchQuery call(QueryEngine engine, List<int> queryCodeUnits) {
+    reset();
+
+    for (int charCode in queryCodeUnits) {
+      onChar(engine: engine, charCode: charCode);
+    }
+    append(engine);
 
     return SearchQuery(
+      engine: engine,
       optional: optional,
       require: require,
       cannot: cannot,
       tags: tags,
     );
   }
+}
+
+class QueryEngine {
+  /// Creates a new [QueryEngine] with the provided
+  /// [PatternItem]s.
+  ///
+  /// The order of [patternItems] doesn't matter.
+  ///
+  /// Uses [builder] to build out each new [SearchQuery].
+  QueryEngine({
+    required Iterable<PatternItem> patternItems,
+    this.defaultPoints = 1,
+    QueryBuilder? builder,
+  }):
+    _items = { for (var elm in patternItems) elm.charCode : elm },
+    _builder = builder ?? QueryBuilder()
+  ;
+
+  final Map<int, PatternItem> _items;
+  Iterable<PatternItem> get values => _items.values;
+
+  /// Defines the number of points to give to
+  /// each [PointedWord] that is generated
+  /// for a [SearchQuery].
+  final int defaultPoints;
+  final QueryBuilder _builder;
+
+  /// Attempts to search for [charCode] in [values].
+  ///
+  /// Returns `null` if no [PatternItem] has it's
+  /// pattern as [charCode].
+  PatternItem? fromCharCode(final int charCode) {
+    return _items[charCode];
+  }
+
+  /// builds the Regular Expression of a search word pattern.
+  RegExp getExpression(String searchWordPattern) {
+    String pattern = RegExp.escape(searchWordPattern);
+    for (var item in values) {
+      if (item.expBound) {
+        pattern = pattern.replaceAll(item.charReplacement!, item.regExpChar!);
+      }
+    }
+    return RegExp(pattern, caseSensitive: false);
+  }
+
+  /// Builds a [SearchQuery] with the
+  /// settings in this [QueryEngine]
+  /// and to process [query] as the
+  /// [SearchQuery]'s [PointedWord]s.
+  SearchQuery buildQuery(String query) {
+    return _builder(this, query.codeUnits);
+  }
+
+  /// Defines the a default to [QueryEngine]
+  /// where it's [PatternItem]s are the ones
+  /// that are defined as static fields in [PatternItem].
+  static final QueryEngine defaultEngine = QueryEngine(
+    patternItems: [
+      PatternItem.ignore,
+      PatternItem.hold,
+      PatternItem.space,
+      PatternItem.cannotHave,
+      PatternItem.tag,
+      PatternItem.wild,
+    ],
+  );
+}
+
+class SearchQuery extends Iteration<PointedWord> {
+  factory SearchQuery.from(
+    String query,
+    {
+      QueryEngine? engine,
+    }
+  ) {
+    engine ??= QueryEngine.defaultEngine;
+    return engine.buildQuery(query);
+  }
 
   SearchQuery({
+    required this.engine,
     required this.optional,
     required this.require,
     required this.cannot,
     required this.tags,
   }):super();
 
+  final QueryEngine engine;
+
+  /// The [PointedWord]s of a query
+  /// that are defined as wanted,
+  /// but not needed.
   final List<PointedWord> optional;
-  final List<PointedWord> require;
+  /// The [PointedWord]s of a query
+  /// that are defined as not allowed.
   final List<PointedWord> cannot;
+  /// The [PointedWord]s of a query
+  /// that are defined as needed.
+  final List<PointedWord> require;
+  /// The [PointedWord]s of a query
+  /// that are defined as tags.
   final List<PointedWord> tags;
 
   @override
@@ -293,17 +630,6 @@ class SearchQuery extends Iteration<PointedWord> {
 
     return percent;
   }
-
-  /// builds the Regular Expression of a search word pattern.
-  static RegExp getExpression(String searchWordPattern) {
-    String pattern = RegExp.escape(searchWordPattern);
-    for (var item in PatternItem.values) {
-      if (item.expBound) {
-        pattern = pattern.replaceAll(item.charReplacement!, item.regExpChar!);
-      }
-    }
-    return RegExp(pattern, caseSensitive: false);
-  }
   
   /// Applies a list of [PointedWord]s to a string to for word comparisons.
   ///
@@ -320,13 +646,13 @@ class SearchQuery extends Iteration<PointedWord> {
   /// logarithmic base 2 of the occurrences.
   ///
   /// If the return is zero then no stated [words] were in [s].
-  static math.Points getPoints(String s, List<PointedWord> words) {
+  math.Points getPoints(String s, List<PointedWord> words) {
     int ocrs = 0;
     int posPoints = 0;
     int negPoints = 0;
     int modifier = 0;
     for (var word in words) {
-      var exp = getExpression(word.word);
+      var exp = engine.getExpression(word.word);
       if (word.points > 0) {
         int occurrences = exp.allMatches(s).length;
         ocrs += occurrences;
@@ -352,12 +678,35 @@ class SearchQuery extends Iteration<PointedWord> {
 class Search {
   /// The [SearchQuery] that was computed from the [String] supplied to [Search].
   final SearchQuery query;
+  /// An optional check that is preformed in [validityCheck]
+  /// before it would have returned `true`.
+  final bool Function(SearchItem)? itemCheck;
 
   Search({
-    required String query
-  }):
-    query = SearchQuery.from(query)
-  ;
+    required this.query,
+    this.itemCheck,
+  });
+
+  Search.from(
+    String query,
+    {
+      QueryEngine? engine,
+      this.itemCheck,
+    }
+  ): query = SearchQuery.from(query, engine: engine);
+
+  /// Checks to see if some [item] is allowed to be
+  /// returned by [search].
+  ///
+  /// Will always return false if item contains anything not allowed or
+  /// doesn't have all the required stuff.
+  ///
+  /// Uses [itemCheck] before saying that [item] is valid.
+  bool validityCheck(SearchItem item) {
+    if (item.comparison.containsNotAllowed || !item.comparison.hasRequired) return false;
+    if (itemCheck != null) return itemCheck!(item);
+    return true;
+  }
 
   /// Compares the [item] to the [query].
   SearchQueryComparison compare(Searchable item) {
@@ -406,10 +755,7 @@ class Search {
         );
       }
 
-      if (
-        seim.comparison.containsNotAllowed ||
-        !seim.comparison.hasRequired
-      ) {
+      if (!validityCheck(seim)) {
         continue;
       }
 
