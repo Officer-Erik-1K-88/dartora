@@ -193,6 +193,8 @@ final v = round(12.55, decimals: 1, mode: bankerTowardZero);
 
 ## Additional information
 
+[Further documentation can be found in docs.](docs/Overview.md)
+
 ### Contributing
 
 - Open issues/PRs with reproducible cases.
