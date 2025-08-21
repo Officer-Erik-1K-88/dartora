@@ -20,6 +20,8 @@ A, batteries‑included utility package, that was built for Dart. It provides:
 - **Math**: robust rounding modes, roots/logs, comparison helpers, points/scoring types, matrices, curves, radix utilities, and constants.
 - **Utilities**: modification tracking helpers and structured error types.
 
+[Documentation can be found here.](doc/Overview.md)
+
 ---
 
 ## Getting started
