@@ -1,6 +1,6 @@
 # Dartora Documentation
 
-Comprehensive API reference generated from source. Each class/function has its own page.
+Comprehensive API reference that was auto generated from source. Each class/function has its own page.
 
 ## Table of Contents
 
