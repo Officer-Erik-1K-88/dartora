@@ -1,74 +1,30 @@
-# HolderIterator
+## HolderIterator<E>
 
-This class `HolderIterator` is part of the `collections` module of the Dartora library. It defines behavior and data structures as implemented in the source code.
+`HolderIterator` flattens a collection of collections into a single iterator.  It is designed for scenarios where you have an iterable of iterables (for example, the rows of a matrix or the segments of an `IterationHolder`) and want to traverse all elements in sequence without manually writing nested loops.
 
-_Defined in: `src/collections/iterators.dart`_
+### Constructor
 
-_Import_: `package:dartora/collections/iterators.dart`
+```
+HolderIterator({
+  required Iterable<Iterable<E>> holder,
+})
+```
 
+* **`holder`** – an iterable whose elements are themselves iterables.  Each inner iterable is treated as a *row* or *segment*.  The iterator yields all elements of the first segment, then proceeds to the second, and so on until all segments have been exhausted.
 
----
+### Internal state
 
-
-### Constructors
-
-#### `_holder.elementAt(_outerIndex);`
-
-Constructs a new instance of `HolderIterator`.
-
-
-
-#### `_outer.elementAt(_innerIndex);`
-
-Constructs a new instance of `HolderIterator`.
-
-
-
-### Fields
-
-#### `_holder;`
-
-Stores the value of `_holder` for this instance of `HolderIterator`.
-
-
-
-#### `holder;`
-
-Stores the value of `holder` for this instance of `HolderIterator`.
-
-
-
-#### `return false;`
-
-Stores the value of `false` for this instance of `HolderIterator`.
-
-
-
-#### `return false;`
-
-Stores the value of `false` for this instance of `HolderIterator`.
-
-
-
-#### `return true;`
-
-Stores the value of `true` for this instance of `HolderIterator`.
-
-
-
-
+| Field | Description |
+|------|-------------|
+| `_holder` | Stores the outer iterable containing the segments.  It is typically a list of lists or a list of `Iteration` objects. |
+| `_outerIndex` | Zero‑based index of the current segment being traversed.  Starts at 0. |
+| `_innerIndex` | Index within the current segment.  Initialised to −1 so that the first call to `moveNext()` sets it to 0. |
 
 ### Methods
 
-#### `override
-  bool moveNext() {`
+* **`current`** – returns the element at `_holder.elementAt(_outerIndex).elementAt(_innerIndex)`.  Calling `current` before `moveNext()` throws a `StateError`.
+* **`moveNext()`** – advances the iterator to the next element.  It increments `_innerIndex`; if `_innerIndex` reaches the end of the current segment, it resets to 0 and increments `_outerIndex` to move to the next segment.  Returns `true` while there are elements left and `false` once all segments are exhausted.
 
-Executes the `moveNext` operation defined in `HolderIterator`.
+### Usage
 
-
-
-#### `if (_innerIndex >= _outer.length) {`
-
-Executes the `if` operation defined in `HolderIterator`.
-
-
+`HolderIterator` is not intended to be used directly by library consumers.  It is used internally by classes such as `Matrix` (to iterate over its rows) and `IterationHolder` (to iterate over concatenated lists) to provide a flattened view.  Because it reads from the underlying iterables without copying, it is efficient for large data sets.  However, it does not support modifying the underlying collections – it simply reads their elements in order.

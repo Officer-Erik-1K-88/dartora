@@ -1,84 +1,32 @@
-# IndexBaseIterator
+## IndexBaseIterator<E>
 
-This class `IndexBaseIterator` is part of the `collections` module of the Dartora library. It defines behavior and data structures as implemented in the source code.
+`IndexBaseIterator` provides a simple way to iterate over any iterable by index.  Many classes in Dartora (including the `Iteration` mixin) prefer to fetch elements using `elementAt()` so that they can apply windowing offsets.  `IndexBaseIterator` wraps an `Iterable<E>` and uses its `elementAt()` method to retrieve values one by one.
 
-_Defined in: `src/collections/iterators.dart`_
+### Constructor
 
-_Import_: `package:dartora/collections/iterators.dart`
+```
+IndexBaseIterator({
+  required Iterable<E> iterable,
+})
+```
 
+* **`iterable`** – the underlying sequence to iterate.  The iterator will yield exactly `iterable.length` elements.
 
----
+Internally, `IndexBaseIterator` stores the `iterable` and sets up an `IteratorBuild` with:
 
+* `elementAt(i)` returning `iterable.elementAt(i)`;
+* `startIndex = 0`;
+* `endIndex = iterable.length`.
 
-### Constructors
+### Behaviour
 
-#### `super(
-      elementAt: iterable.elementAt,
-      endIndex: iterable.length
-    )
-  ;`
+Because `IndexBaseIterator` extends `IteratorBuild`, it inherits the following behaviour:
 
-Constructs a new instance of `IndexBaseIterator`.
+* **`current`** – holds the element most recently returned by `moveNext()`.  Accessing it before calling `moveNext()` throws.
+* **`moveNext()`** – on the first call, sets an internal index to `startIndex` and returns `true` if `startIndex < endIndex`; on subsequent calls, increments the index and returns `true` until the index equals `endIndex`.  Once `moveNext()` returns `false`, the iteration is complete.
 
+`IndexBaseIterator` does not store any data itself; it simply delegates element retrieval to the underlying iterable.  This makes it suitable for iterating over views or other `Iteration` types that may not expose a conventional Dart iterator but do implement `elementAt()`.
 
+### Usage
 
-#### `_holder.elementAt(_outerIndex);`
-
-Constructs a new instance of `IndexBaseIterator`.
-
-
-
-#### `_outer.elementAt(_innerIndex);`
-
-Constructs a new instance of `IndexBaseIterator`.
-
-
-
-### Fields
-
-#### `_holder;`
-
-Stores the value of `_holder` for this instance of `IndexBaseIterator`.
-
-
-
-#### `holder;`
-
-Stores the value of `holder` for this instance of `IndexBaseIterator`.
-
-
-
-#### `return false;`
-
-Stores the value of `false` for this instance of `IndexBaseIterator`.
-
-
-
-#### `return false;`
-
-Stores the value of `false` for this instance of `IndexBaseIterator`.
-
-
-
-#### `return true;`
-
-Stores the value of `true` for this instance of `IndexBaseIterator`.
-
-
-
-
-
-### Methods
-
-#### `override
-  bool moveNext() {`
-
-Executes the `moveNext` operation defined in `IndexBaseIterator`.
-
-
-
-#### `if (_innerIndex >= _outer.length) {`
-
-Executes the `if` operation defined in `IndexBaseIterator`.
-
-
+`IndexBaseIterator` is used internally by the `Iteration` mixin to implement its default `iterator` getter.  It can also be used whenever you need to provide a Dart `Iterator` over a sequence that can be indexed, without relying on the sequence’s own `iterator` implementation.
