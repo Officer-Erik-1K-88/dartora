@@ -77,7 +77,7 @@ class ModificationListener {
   int get modCount => _modCount;
   int _points = 0;
 
-  List<_ModCatch> _catches = [];
+  final List<_ModCatch> _catches = [];
 
   /// Creates the handler that [ModificationListener] needs to function.
   _ModCatch _buildCatch(int level) {

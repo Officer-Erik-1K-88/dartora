@@ -44,29 +44,30 @@ double _f(double m, double c) {
   );
 }
 
+/*
 List<double> _getAB(List<List<double>> mckLists) {
-    double a = 0;
-    double b = 0;
+  double a = 0;
+  double b = 0;
 
-    List<double> answerMatrix = [];
-    List<List<double>> coefficientMatrix = [];
-    for (var mck in mckLists) {
-      double m = mck[0];
-      double c = mck[1];
-      double k = mck[2];
-      double p1 = _f(m, c);
-      double lnC = ln(c);
-      coefficientMatrix.add([
-        (lnC * p1), (c * p1)
-      ]);
-      answerMatrix.add(k);
-    }
-
-    double coefficientInverse = 0;
-
-    return [a,b];
+  List<double> answerMatrix = [];
+  List<List<double>> coefficientMatrix = [];
+  for (var mck in mckLists) {
+    double m = mck[0];
+    double c = mck[1];
+    double k = mck[2];
+    double p1 = _f(m, c);
+    double lnC = ln(c);
+    coefficientMatrix.add([
+      (lnC * p1), (c * p1)
+    ]);
+    answerMatrix.add(k);
   }
 
+  double coefficientInverse = 0;
+
+  return [a,b];
+}
+*/
 double sigmoidCurve(
   num input,
   {
