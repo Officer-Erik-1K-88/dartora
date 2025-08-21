@@ -1,6 +1,6 @@
 # ModResetType
 
-_No summary provided in source._
+The enum `ModResetType` defines a set of named constants used within the library.
 
 _Defined in: `src/modification.dart`_
 

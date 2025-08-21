@@ -1,6 +1,6 @@
 # EventAction
 
-_No summary provided in source._
+Defines an alias `EventAction` for `void Function(ChildAction action)?` used within the library.
 
 _Defined in: `src/search/searchable.dart`_
 

@@ -1,6 +1,6 @@
 # ChildActionType
 
-_No summary provided in source._
+The enum `ChildActionType` defines a set of named constants used within the library.
 
 _Defined in: `src/search/searchable.dart`_
 

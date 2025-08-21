@@ -1,6 +1,6 @@
 # _f
 
-_No summary provided in source._
+Function `_f` is part of the `math` module of the Dartora library. Refer to its implementation in the source code for behavior details.
 
 _Defined in: `src/math/advanced/curves.dart`_
 

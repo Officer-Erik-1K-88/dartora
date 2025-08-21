@@ -1,6 +1,6 @@
 # toDouble
 
-_No summary provided in source._
+Function `toDouble` is part of the `math` module of the Dartora library. Refer to its implementation in the source code for behavior details.
 
 _Defined in: `src/math/basic/comparison.dart`_
 
