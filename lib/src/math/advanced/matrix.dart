@@ -5,6 +5,32 @@ import '../basic/comparison.dart';
 import '../basic/root.dart';
 
 class Matrix extends Iteration<num> {
+  static final Map<int, Matrix> _identities = {};
+
+  /// Gets the identity matrix where the
+  /// given matrix has a row and column count of [count].
+  ///
+  /// # What is an Identity Matrix?
+  ///
+  /// {@macro math.matrix.identity}
+  static Matrix getIdentity(int count) {
+    return _identities.putIfAbsent(count, () {
+      List<List<num>> newMatrix = [];
+      for (int i=0; i<count; i++) {
+        List<num> row = [];
+        for (int j=0; j<count; j++) {
+          if (i == j) {
+            row.add(1);
+          } else {
+            row.add(0);
+          }
+        }
+        newMatrix.add(row);
+      }
+      return Matrix(newMatrix);
+    });
+  }
+
   final List<List<num>> _matrix;
 
   /// The number of rows in the matrix.
@@ -160,6 +186,9 @@ class Matrix extends Iteration<num> {
   /// another [Matrix].
   ///
   /// Or divides each [num] in this matrix by [other].
+  ///
+  /// In terms of division, matrices can't divided.
+  /// However, it is faked by use of multiplication.
   Matrix operator /(dynamic other) {
     if (other is Matrix) {
       return this * other.inverse;
@@ -197,6 +226,15 @@ class Matrix extends Iteration<num> {
   double? _determinant;
 
   /// Gets the determinant of this [Matrix].
+  ///
+  /// {@template math.matrix.determinant}
+  /// For a matrix to have a determinant
+  /// it must be square (same number of rows and columns).
+  ///
+  /// The determinant helps us find the inverse of a matrix,
+  /// tells us things about the matrix that are useful in systems of linear equations,
+  /// calculus and more.
+  /// {@endtemplate}
   double get determinant {
     if (_determinant != null) {
       if (rowCount != columnCount) throw StateError('Cannot compute determinant of non-square Matrix.');
@@ -258,14 +296,24 @@ class Matrix extends Iteration<num> {
   ///
   /// The inverse is defined as this [Matrix]
   /// to the [power] of `-1`.
+  ///
+  /// {@template math.matrix.inverse}
+  /// For a matrix to have an inverse
+  /// it must be square (same number of rows and columns).
+  /// Also the [determinant] cannot be zero (or we end up dividing by zero).
+  ///
+  /// The inverse exists because there is no concept of dividing by a matrix.
+  /// But we can **multiply by an inverse**, which achieves the same thing.
+  /// {@endtemplate}
   Matrix get inverse {
     if (_inverse == null) {
       if (rowCount != columnCount) throw StateError('Cannot compute inverse of non-square Matrix.');
+      if (determinant == 0) throw StateError('Cannot compute inverse of a Matrix with a determinant of zero.');
       Matrix flip = Matrix.empty();
       if (rowCount == 2 && columnCount == 2) {
         flip = Matrix([
-          [_matrix[1][1], -_matrix[0][1]],
-          [-_matrix[1][0], _matrix[0][0]]
+          [get(1, 1), -get(0, 1)],
+          [-get(1, 0), get(0, 0)]
         ]);
       } else {
         flip = adjoint;
@@ -279,7 +327,8 @@ class Matrix extends Iteration<num> {
   Matrix? _transposed;
 
   /// Gets the [Matrix] where
-  /// the columns of this [Matrix] are the rows.
+  /// the columns of this [Matrix] are the rows
+  /// of the returned [Matrix].
   Matrix get transpose {
     if (_transposed == null) {
       List<List<num>> newMatrix = [];
@@ -298,21 +347,19 @@ class Matrix extends Iteration<num> {
   Matrix? _identity;
 
   /// Gets the identity [Matrix] of this [Matrix].
+  ///
+  /// {@template math.matrix.identity}
+  /// The identity [Matrix] is equivalent to the
+  /// number "1".
+  ///
+  /// - It is "square" (has same number of rows as columns).
+  /// - It has **1**s on the diagonal and **0**s everywhere else.
+  /// - Its symbol is the capital letter **I**.
+  /// {@endtemplate}
   Matrix get identity {
     if (_identity == null) {
-      List<List<num>> newMatrix = [];
-      for (int i=0; i<columnCount; i++) {
-        List<num> row = [];
-        for (int j=0; j<rowCount; j++) {
-          if (i == j) {
-            row.add(1);
-          } else {
-            row.add(0);
-          }
-        }
-        newMatrix.add(row);
-      }
-      _identity = Matrix(newMatrix);
+      if (rowCount != columnCount) throw StateError('Cannot compute identity of non-square Matrix.');
+      _identity = getIdentity(rowCount);
     }
     return _identity!;
   }
