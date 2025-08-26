@@ -138,12 +138,22 @@ class Matrix extends Iteration<num> {
   /// Multiplies this [Matrix] to itself [exponent]
   /// amount of times.
   Matrix power(int exponent) {
-    // TODO: Optimize this method for when exponent is large.
-    Matrix answer = this;
-    for (int i=1; i<exponent; i++) {
-      answer *= this;
+    if (exponent > 1) {
+      assert(columnCount == rowCount);
+      // TODO: Optimize this for when exponent is large.
+      Matrix answer = this;
+      for (int i=1; i<exponent; i++) {
+        answer *= this;
+      }
+      return answer;
+    } else if (exponent == 1) {
+      return this;
+    } else if (exponent == 0) {
+      return identity;
+    } else if (exponent == -1) {
+      return inverse;
     }
-    return answer;
+    return inverse.power(exponent.abs());
   }
 
   /// Multiplies this [Matrix] to the inverse of
