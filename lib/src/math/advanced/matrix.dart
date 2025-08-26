@@ -7,7 +7,10 @@ import '../basic/root.dart';
 class Matrix extends Iteration<num> {
   final List<List<num>> _matrix;
 
+  /// The number of rows in the matrix.
   int get rowCount => _matrix.length;
+
+  /// The number of columns in the matrix.
   int get columnCount => rowCount!=0 ? _matrix[0].length : 0;
 
   @override
@@ -23,6 +26,8 @@ class Matrix extends Iteration<num> {
 
   Matrix._(this._matrix);
 
+  /// Builds a [Matrix] where [matrix]
+  /// is used as the list of rows.
   factory Matrix(List<List<num>> matrix) {
     int? columnCount;
     for (var matrixRow in matrix) {
@@ -34,6 +39,7 @@ class Matrix extends Iteration<num> {
     return Matrix._(matrix);
   }
 
+  /// Builds an empty [Matrix].
   Matrix.empty(): _matrix=[];
 
   @override
@@ -49,10 +55,14 @@ class Matrix extends Iteration<num> {
     throw IndexError.withLength(sourceIndex, length);
   }
 
+  /// Gets the [num] that is at the coordinates
+  /// of [row] and [column].
   num get(int row, int column) {
     return _matrix[row][column];
   }
 
+  /// Adds this [Matrix] and another [Matrix] together
+  /// and returns the sum [Matrix].
   Matrix operator +(Matrix other) {
     assert(rowCount == other.rowCount);
     assert(columnCount == other.columnCount);
@@ -66,6 +76,8 @@ class Matrix extends Iteration<num> {
     return Matrix(matrix);
   }
 
+  /// Subtracts a [Matrix] from this [Matrix]
+  /// and returns the difference [Matrix].
   Matrix operator -(Matrix other) {
     assert(rowCount == other.rowCount);
     assert(columnCount == other.columnCount);
@@ -79,6 +91,9 @@ class Matrix extends Iteration<num> {
     return Matrix(matrix);
   }
 
+  /// Returns a new [Matrix] where
+  /// the signs of all [num]s in this [Matrix]
+  /// have been flipped.
   Matrix operator -() {
     List<List<num>> matrix = [];
     for (int i=0; i<rowCount; i++) {
@@ -90,6 +105,8 @@ class Matrix extends Iteration<num> {
     return Matrix(matrix);
   }
 
+  /// Multiplies this [Matrix] with some other [num]
+  /// or [Matrix].
   Matrix operator *(dynamic other) {
     if (other is Matrix) {
       assert(columnCount == other.rowCount);
@@ -118,14 +135,21 @@ class Matrix extends Iteration<num> {
     return Matrix(matrix);
   }
 
+  /// Multiplies this [Matrix] to itself [exponent]
+  /// amount of times.
   Matrix power(int exponent) {
+    // TODO: Optimize this method for when exponent is large.
     Matrix answer = this;
-    for (int i=0; i<exponent; i++) {
+    for (int i=1; i<exponent; i++) {
       answer *= this;
     }
     return answer;
   }
 
+  /// Multiplies this [Matrix] to the inverse of
+  /// another [Matrix].
+  ///
+  /// Or divides each [num] in this matrix by [other].
   Matrix operator /(dynamic other) {
     if (other is Matrix) {
       return this * other.inverse;
@@ -142,6 +166,7 @@ class Matrix extends Iteration<num> {
     return Matrix(matrix);
   }
 
+  /// Helper function that helps build the [determinant].
   num _calculateDet(int row, int column) {
     List<List<num>> newMatrix = [];
     for (int j=0; j<rowCount; j++) {
@@ -160,6 +185,8 @@ class Matrix extends Iteration<num> {
   }
 
   double? _determinant;
+
+  /// Gets the determinant of this [Matrix].
   double get determinant {
     if (_determinant != null) {
       if (rowCount != columnCount) throw StateError('Cannot compute determinant of non-square Matrix.');
@@ -183,6 +210,9 @@ class Matrix extends Iteration<num> {
     return _determinant!;
   }
 
+  /// Helper function to build the [num]
+  /// that is to replace each item in this [Matrix]
+  /// when calculating [cofactor].
   num _cfact(int row, int column) {
     num p1 = pow(-1, (row+1)+(column+1));
     num p2 = rowCount == 2? get(row, column) : _calculateDet(row, column);
@@ -190,6 +220,8 @@ class Matrix extends Iteration<num> {
   }
 
   Matrix? _cofactor;
+
+  /// Gets the cofactor of this [Matrix].
   Matrix get cofactor {
     if (_cofactor == null) {
       if (rowCount != columnCount) throw StateError('Cannot compute cofactor of non-square Matrix.');
@@ -206,9 +238,16 @@ class Matrix extends Iteration<num> {
     return _cofactor!;
   }
 
+  /// gets the [Matrix.transpose]
+  /// of [cofactor].
   Matrix get adjoint => cofactor.transpose;
 
   Matrix? _inverse;
+
+  /// Gets the inverse of this [Matrix].
+  ///
+  /// The inverse is defined as this [Matrix]
+  /// to the [power] of `-1`.
   Matrix get inverse {
     if (_inverse == null) {
       if (rowCount != columnCount) throw StateError('Cannot compute inverse of non-square Matrix.');
@@ -228,6 +267,9 @@ class Matrix extends Iteration<num> {
   }
 
   Matrix? _transposed;
+
+  /// Gets the [Matrix] where
+  /// the columns of this [Matrix] are the rows.
   Matrix get transpose {
     if (_transposed == null) {
       List<List<num>> newMatrix = [];
@@ -244,6 +286,8 @@ class Matrix extends Iteration<num> {
   }
 
   Matrix? _identity;
+
+  /// Gets the identity [Matrix] of this [Matrix].
   Matrix get identity {
     if (_identity == null) {
       List<List<num>> newMatrix = [];
@@ -264,6 +308,8 @@ class Matrix extends Iteration<num> {
   }
 
   Matrix? _rowEchelon;
+
+  /// Gets the row echelon of this [Matrix].
   Matrix get rowEchelon {
     // TODO: Make computation actually work correctly.
     if (_rowEchelon == null) {
