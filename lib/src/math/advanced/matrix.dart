@@ -111,81 +111,84 @@ class Matrix extends Iteration<num> {
     required dynamic other,
     required bool otherFirst,
   }) {
+    Matrix first;
+    Matrix second;
 
-    List<List<num>> newMatrix = [];
+    num Function(int, int)? compute;
 
     if (other is Matrix) {
-      Matrix first = otherFirst? other : this;
-      Matrix second = otherFirst? this : other;
-      
-      assert(columnCount == other.columnCount);
+      first = otherFirst? other : this;
+      second = otherFirst? this : other;
+
       if (!multiply) {
         assert(rowCount == other.rowCount);
+        assert(columnCount == other.columnCount);
+        if (add) {
+          compute = (i, j) { // addition cell computation
+            return first.get(i, j) + second.get(i, j);
+          };
+        } else {
+          compute = (i, j) { // subtraction cell computation
+            return first.get(i, j) - second.get(i, j);
+          };
+        }
       } else {
+        assert(columnCount == other.rowCount);
         if (!add) { // if division, then fix bottom matrix to it's inverse
           second = second.inverse;
         }
-      }
-      for (int i=0; i<first.rowCount; i++) {
-        List<num> row = [];
-        for (int j=0; j<second.columnCount; j++) {
-          if (multiply) {
-            num cell = 0;
-            for (int i2=0; i<first.columnCount; i2++) {
-              cell += first.get(i, i2) * second.get(i2, j);
-            }
-            row.add(cell);
-          } else {
-            num sc = second.get(i, j);
-            row.add(
-              first.get(i, j) +
-              (add? sc : -sc) // flip sign only when needing to subtract
-            );
+        compute = (i, j) { // multiplication cell computation
+          num cell = 0;
+          for (int i2=0; i<first.columnCount; i2++) {
+            cell += first.get(i, i2) * second.get(i2, j);
           }
-        }
-        newMatrix.add(row);
+          return cell;
+        };
       }
     } else {
       assert(other is num);
       assert(!(other as num).isNaN);
-      Matrix self = this;
-
-      num Function(int, int)? compute;
+      first = this;
 
       if (multiply) {
         if (!add) {
           if (otherFirst) { // if division and other is first, then other is multiplied to the inverse of self.
-            self = self.inverse;
+            first = first.inverse;
           } else { // if division and not other is first, then divide each cell by other.
-            compute = (i, j) {
-              return self.get(i, j) / other;
+            compute = (i, j) { // division cell computation
+              return first.get(i, j) / other;
             };
           }
         }
-        compute ??= (i, j) {
-          return self.get(i, j) * other;
+        compute ??= (i, j) { // multiplication cell computation
+          return first.get(i, j) * other;
         };
       } else {
         if (add) {
-          compute = (i, j) {
-            if (otherFirst) return other + self.get(i, j);
-            return self.get(i, j) + other;
+          compute = (i, j) { // addition cell computation
+            if (otherFirst) return other + first.get(i, j);
+            return first.get(i, j) + other;
           };
         } else {
-          compute = (i, j) {
-            if (otherFirst) return other - self.get(i, j);
-            return self.get(i, j) - other;
+          compute = (i, j) { // subtraction cell computation
+            if (otherFirst) return other - first.get(i, j);
+            return first.get(i, j) - other;
           };
         }
       }
+      
+      second = first;
+    }
+    
+    List<List<num>> newMatrix = [];
 
-      for (int i=0; i<self.rowCount; i++) {
-        List<num> row = [];
-        for (int j=0; j<self.columnCount; j++) {
-          row.add(compute(i, j));
-        }
-        newMatrix.add(row);
+    // Loop through this and other and compute each cell
+    for (int i=0; i<first.rowCount; i++) {
+      List<num> row = [];
+      for (int j=0; j<second.columnCount; j++) {
+        row.add(compute(i, j));
       }
+      newMatrix.add(row);
     }
 
 
