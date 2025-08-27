@@ -407,26 +407,58 @@ class Matrix extends Iteration<num> {
     return _determinant!;
   }
 
-  /// Helper function to build the [num]
+  Matrix? _minor;
+
+  /// Gets the "Matrix of Minors".
+  ///
+  /// {@template math.matrix.minor}
+  /// The "Matrix of Minors" is a matrix of determinants.
+  ///
+  /// The determinants are found by doing the following for each element in the matrix:
+  /// - ignore the values on the current row and column
+  /// - calculate the determinant of the remaining values
+  /// {@endtemplate}
+  Matrix get minor {
+    if (_minor == null) {
+      if (rowCount != columnCount) throw StateError('Cannot compute minor of non-square Matrix.');
+      List<List<num>> newMatrix = [];
+      for (int i=0; i< rowCount; i++) {
+        List<num> row = [];
+        for (int j=0; j<columnCount; j++) {
+          row.add(_calculateDet(i, j));
+        }
+        newMatrix.add(row);
+      }
+      _minor = Matrix(newMatrix);
+    }
+    return _minor!;
+  }
+
+  /// Helper function to build the determinant
   /// that is to replace each item in this [Matrix]
   /// when calculating [cofactor].
   num _cfact(int row, int column) {
-    num p1 = pow(-1, (row+1)+(column+1));
-    num p2 = rowCount == 2? get(row, column) : _calculateDet(row, column);
-    return p1 * p2;
+    num cell = _calculateDet(row, column);
+    if ((row + column).isEven) return cell;
+    return -cell;
   }
 
   Matrix? _cofactor;
 
   /// Gets the cofactor of this [Matrix].
+  ///
+  /// {@template math.matrix.coFactor}
+  /// The cofactor is just the application of minuses to the "Matrix of Minors"
+  /// in a checkerboard pattern. Where the first element is not affected.
+  /// {@endtemplate}
   Matrix get cofactor {
     if (_cofactor == null) {
       if (rowCount != columnCount) throw StateError('Cannot compute cofactor of non-square Matrix.');
       List<List<num>> newMatrix = [];
-      for (int i=0; i<columnCount; i++) {
+      for (int i=0; i<rowCount; i++) {
         List<num> row = [];
-        for (int j=0; j<rowCount; j++) {
-          row.add(_cfact(j, i));
+        for (int j=0; j<columnCount; j++) {
+          row.add(_cfact(i, j));
         }
         newMatrix.add(row);
       }
@@ -641,7 +673,6 @@ class Matrix extends Iteration<num> {
   /// Gets the rank of this [Matrix].
   ///
   /// ### What is Rank?
-  ///
   /// {@template math.matrix.rank}
   /// The rank is how many of the rows are "unique":
   /// not made of other rows. (Same for columns.)
@@ -668,6 +699,8 @@ class Matrix extends Iteration<num> {
     return _rank!;
   }
 
+  /// Gets a copy of the [List] of rows in
+  /// this [Matrix].
   List<List<num>> copyData() {
     return _matrix.map((r) => List<num>.from(r)).toList();
   }
