@@ -384,7 +384,7 @@ class Matrix extends Iteration<num> {
   /// calculus and more.
   /// {@endtemplate}
   double get determinant {
-    if (_determinant != null) {
+    if (_determinant == null) {
       if (rowCount != columnCount) throw StateError('Cannot compute determinant of non-square Matrix.');
       if (rowCount == 2 && columnCount == 2) {
         num ad = _matrix[0][0] * _matrix[1][1];
