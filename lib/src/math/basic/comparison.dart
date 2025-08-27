@@ -34,12 +34,17 @@ T numberCast<T extends num>(dynamic obj) {
 
   // Convert obj to a numeric value.
   num? n;
-  if (obj is num) n = obj;
-  if (obj == null || obj == false) n = 0;
-  if (obj == true) n = 1;
-  if (obj is Points) n = obj.total;
-  if (obj is BaseRadix) n = obj.number;
-  if (obj is String) {
+  if (obj is num) {
+    n = obj;
+  } else if (obj == null || obj == false) {
+    n = 0;
+  } else if (obj == true) {
+    n = 1;
+  } else if (obj is Points) {
+    n = obj.total;
+  } else if (obj is BaseRadix) {
+    n = obj.number;
+  } else if (obj is String) {
     n = double.tryParse(obj);
     if (n == null) {
       if (obj.isEmpty) {
@@ -68,8 +73,8 @@ T numberCast<T extends num>(dynamic obj) {
   }
 
   // ensure that n is the correct numeric type.
-  if (T is int) return n.toInt() as T;
-  if (T is double) return n.toDouble() as T;
+  if (T == int) return n.toInt() as T;
+  if (T == double) return n.toDouble() as T;
 
   // Falls to here only because T isn't a known extention of num
   // or is num itself.
