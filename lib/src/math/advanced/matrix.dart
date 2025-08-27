@@ -90,78 +90,131 @@ class Matrix extends Iteration<num> {
     return _matrix[row][column];
   }
 
+  /// Helper function that defines how
+  /// math operations are preformed.
+  ///
+  /// Configurations of [add] and [multiply]:
+  /// - If [add] and not [multiply] then
+  /// normal addition.
+  /// - If [add] and [multiply] then
+  /// normal multiplication.
+  /// - If not [add] and not [multiply] then
+  /// normal subtraction.
+  /// - If not [add] and [multiply] then
+  /// multiplication of inverse.
+  ///
+  /// If [otherFirst] then [other]
+  /// will be in front of the operator.
+  Matrix _mathOperation({
+    required bool add,
+    required bool multiply,
+    required dynamic other,
+    required bool otherFirst,
+  }) {
+
+    List<List<num>> newMatrix = [];
+
+    if (other is Matrix) {
+      Matrix first = otherFirst? other : this;
+      Matrix second = otherFirst? this : other;
+      
+      assert(columnCount == other.columnCount);
+      if (!multiply) {
+        assert(rowCount == other.rowCount);
+      } else {
+        if (!add) { // if division, then fix bottom matrix to it's inverse
+          second = second.inverse;
+        }
+      }
+      for (int i=0; i<first.rowCount; i++) {
+        List<num> row = [];
+        for (int j=0; j<second.columnCount; j++) {
+          if (multiply) {
+            num cell = 0;
+            for (int i2=0; i<first.columnCount; i2++) {
+              cell += first.get(i, i2) * second.get(i2, j);
+            }
+            row.add(cell);
+          } else {
+            num sc = second.get(i, j);
+            row.add(
+              first.get(i, j) +
+              (add? sc : -sc) // flip sign only when needing to subtract
+            );
+          }
+        }
+        newMatrix.add(row);
+      }
+    } else {
+      assert(other is num);
+      assert(!(other as num).isNaN);
+      Matrix self = this;
+
+      num Function(int, int)? compute;
+
+      if (multiply) {
+        if (!add) {
+          if (otherFirst) { // if division and other is first, then other is multiplied to the inverse of self.
+            self = self.inverse;
+          } else { // if division and not other is first, then divide each cell by other.
+            compute = (i, j) {
+              return self.get(i, j) / other;
+            };
+          }
+        }
+        compute ??= (i, j) {
+          return self.get(i, j) * other;
+        };
+      } else {
+        if (add) {
+          compute = (i, j) {
+            if (otherFirst) return other + self.get(i, j);
+            return self.get(i, j) + other;
+          };
+        } else {
+          compute = (i, j) {
+            if (otherFirst) return other - self.get(i, j);
+            return self.get(i, j) - other;
+          };
+        }
+      }
+
+      for (int i=0; i<self.rowCount; i++) {
+        List<num> row = [];
+        for (int j=0; j<self.columnCount; j++) {
+          row.add(compute(i, j));
+        }
+        newMatrix.add(row);
+      }
+    }
+
+
+    return Matrix(newMatrix);
+  }
+
   /// Adds this [Matrix] and another [Matrix] together
   /// and returns the sum [Matrix].
   Matrix operator +(Matrix other) {
-    assert(rowCount == other.rowCount);
-    assert(columnCount == other.columnCount);
-    List<List<num>> matrix = [];
-    for (int i=0; i<rowCount; i++) {
-      matrix.add([]);
-      for (int j=0; j<columnCount; j++) {
-        matrix[length-1].add(get(i, j) + other.get(i, j));
-      }
-    }
-    return Matrix(matrix);
+    return _mathOperation(add: true, multiply: false, other: other, otherFirst: false);
   }
 
   /// Subtracts a [Matrix] from this [Matrix]
   /// and returns the difference [Matrix].
   Matrix operator -(Matrix other) {
-    assert(rowCount == other.rowCount);
-    assert(columnCount == other.columnCount);
-    List<List<num>> matrix = [];
-    for (int i=0; i<rowCount; i++) {
-      matrix.add([]);
-      for (int j=0; j<columnCount; j++) {
-        matrix[length-1].add(get(i, j) - other.get(i, j));
-      }
-    }
-    return Matrix(matrix);
+    return _mathOperation(add: false, multiply: false, other: other, otherFirst: false);
   }
 
   /// Returns a new [Matrix] where
   /// the signs of all [num]s in this [Matrix]
   /// have been flipped.
   Matrix operator -() {
-    List<List<num>> matrix = [];
-    for (int i=0; i<rowCount; i++) {
-      matrix.add([]);
-      for (int j=0; j<columnCount; j++) {
-        matrix[length-1].add(-get(i, j));
-      }
-    }
-    return Matrix(matrix);
+    return _mathOperation(add: false, multiply: false, other: 0, otherFirst: true);
   }
 
   /// Multiplies this [Matrix] with some other [num]
   /// or [Matrix].
   Matrix operator *(dynamic other) {
-    if (other is Matrix) {
-      assert(columnCount == other.rowCount);
-      List<List<num>> newMatrix = [];
-      for (int i=0; i<rowCount; i++) {
-        List<num> row = [];
-        for (int j=0; i<other.columnCount; j++) {
-          num cell = 0;
-          for (int i2=0; i<columnCount; i2++) {
-            cell += get(i, i2) * other.get(i2, j);
-          }
-          row.add(cell);
-        }
-        newMatrix.add(row);
-      }
-      return Matrix(newMatrix);
-    }
-    assert(other is num);
-    List<List<num>> matrix = [];
-    for (int i=0; i<rowCount; i++) {
-      matrix.add([]);
-      for (int j=0; j<columnCount; j++) {
-        matrix[length-1].add(get(i, j) * other);
-      }
-    }
-    return Matrix(matrix);
+    return _mathOperation(add: true, multiply: true, other: other, otherFirst: false);
   }
 
   /// Multiplies this [Matrix] to itself [exponent]
@@ -193,19 +246,7 @@ class Matrix extends Iteration<num> {
   /// In terms of division, matrices can't divided.
   /// However, it is faked by use of multiplication.
   Matrix operator /(dynamic other) {
-    if (other is Matrix) {
-      return this * other.inverse;
-    }
-    assert(other is num);
-    assert(!(other as num).isNaN);
-    List<List<num>> matrix = [];
-    for (int i=0; i<rowCount; i++) {
-      matrix.add([]);
-      for (int j=0; j<columnCount; j++) {
-        matrix[length-1].add(get(i, j) / other);
-      }
-    }
-    return Matrix(matrix);
+    return _mathOperation(add: false, multiply: true, other: other, otherFirst: false);
   }
 
   /// Helper function that helps build the [determinant].
