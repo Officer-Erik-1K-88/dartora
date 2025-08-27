@@ -105,7 +105,98 @@ class Matrix extends Iteration<num> {
   ///
   /// If [otherFirst] then [other]
   /// will be in front of the operator.
-  Matrix _mathOperation({
+  ///
+  /// ### Addition
+  /// {@template math.matrix.addition}
+  /// The addition of matrices is defined as the process
+  /// of getting the sum [Matrix] from adding one
+  /// [Matrix] to another [Matrix].
+  ///
+  /// For two matrices to be added, they must be of the
+  /// same size, i.e. the rows must match in size,
+  /// and the columns must match in size.
+  /// {@endtemplate}
+  ///
+  /// While in terms of actual math, we shouldn't be able
+  /// to add a [num] to a matrix. However, with the use of
+  /// [operation] we can. This is for simplicity.
+  ///
+  /// ### Subtraction
+  /// {@template math.matrix.subtraction}
+  /// The subtraction of matrices is defined as the process
+  /// of getting the difference [Matrix] from subtracting one
+  /// [Matrix] from another [Matrix].
+  ///
+  /// For two matrices to be subtracted, they must be of the
+  /// same size, i.e. the rows must match in size,
+  /// and the columns must match in size.
+  /// {@endtemplate}
+  ///
+  /// While in terms of actual math, we shouldn't be able
+  /// to subtract a [num] from a matrix. However, with the
+  /// use of [operation] we can. This is for simplicity and
+  /// for being able to have unary functionality.
+  ///
+  /// ### Unary
+  /// {@template math.matrix.unary}
+  /// The unary (or negative) of a [Matrix] is
+  /// the value of a [Matrix] if the signs of
+  /// all cells are flipped.
+  /// {@endtemplate}
+  ///
+  /// ### Multiplication
+  /// {@template math.matrix.multiplication}
+  /// We can multiply a [Matrix] by a [num] or another [Matrix].
+  ///
+  /// Firstly, multiplying by a [num] is called "scalar multiplication",
+  /// as we refer to [num] as a **scalar**. It is referred to this because
+  /// we are using a single number to scale (↕) the values in the [Matrix].
+  ///
+  /// Secondly, multiplying by another [Matrix] requires the usage of the
+  /// "dot product" of rows and columns.
+  ///
+  /// When multiplying matrices, the _Commutative Law of Multiplication_
+  /// (3 × 5 = 5 × 3) may not hold true as demonstrated below:
+  /// > | 1 2 | × | 2 0 | = | 1×2+2×1 1×0+2×2 | = | 4 4 | <br>
+  /// > | 3 4 | × | 1 2 | = | 3×2+4×1 3×0+4×2 | = | 10 8 |
+  /// >
+  /// > ---
+  /// >
+  /// > | 2 0 | × | 1 2 | = | 2×1+0×3 2×2+0×4 | = | 2 4 | <br>
+  /// > | 1 2 | × | 3 4 | = | 1×1+2×3 1×2+2×4 | = | 7 10 |
+  ///
+  /// However, it can have the same result (such as when one matrix is the Identity Matrix) but not usually.
+  /// {@endtemplate}
+  ///
+  /// #### What is the dot product?
+  /// {@template math.dotProduct}
+  /// The dot product is where we multiply matching members, then sum up.
+  ///
+  /// For example, we have a row of `(1, 2, 3)` and a column of `(7, 9, 11)`.
+  /// First, we match the 1st members (1 and 7), multiply them,
+  /// likewise for the 2nd members (2 and 9) and the 3rd members (3 and 11),
+  /// and finally sum them up. So that would look a little like, `1×7 + 2×9 + 3×11`.
+  /// So in total the equation `(1, 2, 3) • (7, 9, 11)` would give us `58`.
+  /// {@endtemplate}
+  ///
+  /// ### Division
+  /// {@template math.matrix.division}
+  /// With matrices, there is no such thing as division.
+  ///
+  /// Instead it is faked by the use of multiplication.
+  ///
+  /// So what do we define as division?
+  ///
+  /// Well, between two matrices, it is the multiplication
+  /// of one [Matrix] to the [inverse] of another [Matrix].
+  ///
+  /// However, for simplicity, we made division of
+  /// a [num] possible. This is only possible because
+  /// division is just the same as doing `matrix * (1/number)`.
+  /// But, if [num] is to be before the matrix, then
+  /// division becomes `matrix.inverse * number`.
+  /// {@endtemplate}
+  Matrix operation({
     required bool add,
     required bool multiply,
     required dynamic other,
@@ -197,27 +288,39 @@ class Matrix extends Iteration<num> {
 
   /// Adds this [Matrix] and another [Matrix] together
   /// and returns the sum [Matrix].
+  ///
+  /// ### Add Operation
+  /// {@macro math.matrix.addition}
   Matrix operator +(Matrix other) {
-    return _mathOperation(add: true, multiply: false, other: other, otherFirst: false);
+    return operation(add: true, multiply: false, other: other, otherFirst: false);
   }
 
   /// Subtracts a [Matrix] from this [Matrix]
   /// and returns the difference [Matrix].
+  ///
+  /// ### Subtract Operation
+  /// {@macro math.matrix.subtraction}
   Matrix operator -(Matrix other) {
-    return _mathOperation(add: false, multiply: false, other: other, otherFirst: false);
+    return operation(add: false, multiply: false, other: other, otherFirst: false);
   }
 
   /// Returns a new [Matrix] where
   /// the signs of all [num]s in this [Matrix]
   /// have been flipped.
+  ///
+  /// ### Unary Operation
+  /// {@macro math.matrix.unary}
   Matrix operator -() {
-    return _mathOperation(add: false, multiply: false, other: 0, otherFirst: true);
+    return operation(add: false, multiply: false, other: 0, otherFirst: true);
   }
 
   /// Multiplies this [Matrix] with some other [num]
   /// or [Matrix].
+  ///
+  /// ### Multiply Operation
+  /// {@macro math.matrix.multiplication}
   Matrix operator *(dynamic other) {
-    return _mathOperation(add: true, multiply: true, other: other, otherFirst: false);
+    return operation(add: true, multiply: true, other: other, otherFirst: false);
   }
 
   /// Multiplies this [Matrix] to itself [exponent]
@@ -242,14 +345,13 @@ class Matrix extends Iteration<num> {
   }
 
   /// Multiplies this [Matrix] to the inverse of
-  /// another [Matrix].
+  /// another [Matrix]. Or divides each [num] in
+  /// this matrix by [other].
   ///
-  /// Or divides each [num] in this matrix by [other].
-  ///
-  /// In terms of division, matrices can't divided.
-  /// However, it is faked by use of multiplication.
+  /// ### Divide Operation
+  /// {@macro math.matrix.division}
   Matrix operator /(dynamic other) {
-    return _mathOperation(add: false, multiply: true, other: other, otherFirst: false);
+    return operation(add: false, multiply: true, other: other, otherFirst: false);
   }
 
   /// Helper function that helps build the [determinant].
