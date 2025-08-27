@@ -68,8 +68,8 @@ T numberCast<T extends num>(dynamic obj) {
   }
 
   // ensure that n is the correct numeric type.
-  if (T is int) return n.toInt() as T;
-  if (T is double) return n.toDouble() as T;
+  if (T == int) return n.toInt() as T;
+  if (T == double) return n.toDouble() as T;
 
   // Falls to here only because T isn't a known extention of num
   // or is num itself.
