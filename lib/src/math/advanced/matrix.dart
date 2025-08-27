@@ -1,4 +1,3 @@
-
 import '../../collections/iteration.dart';
 import '../../collections/iterators.dart';
 import '../basic/comparison.dart';
@@ -280,7 +279,6 @@ class Matrix extends Iteration<num> {
       }
       newMatrix.add(row);
     }
-
 
     return Matrix(newMatrix);
   }
@@ -696,6 +694,24 @@ class Matrix extends Iteration<num> {
       });
     }
     return _rank!;
+  }
+
+  double? _trace;
+
+  /// Gets the trace of this [Matrix].
+  ///
+  /// {@template math.matrix.trace}
+  /// The trace of a matrix is the sum of its diagonal elements.
+  /// {@endtemplate}
+  double get trace {
+    if (_trace == null) {
+      if (rowCount != columnCount) throw StateError('Cannot compute trace of non-square Matrix.');
+      _trace = 0;
+      for (int i=0; i<rowCount; i++) {
+        _trace = _trace! + get(i, i);
+      }
+    }
+    return _trace!;
   }
 
   /// Gets a copy of the [List] of rows in
