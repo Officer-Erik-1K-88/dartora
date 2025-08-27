@@ -2,7 +2,6 @@
 import '../../collections/iteration.dart';
 import '../../collections/iterators.dart';
 import '../basic/comparison.dart';
-import '../basic/root.dart';
 
 class Matrix extends Iteration<num> {
   static final Map<int, Matrix> _identities = {};
@@ -355,7 +354,7 @@ class Matrix extends Iteration<num> {
   }
 
   /// Helper function that helps build the [determinant].
-  num _calculateDet(int row, int column) {
+  num calculateDet(int row, int column) {
     List<List<num>> newMatrix = [];
     for (int j=0; j<rowCount; j++) {
       if (j == row) continue;
@@ -397,7 +396,7 @@ class Matrix extends Iteration<num> {
         for (int i=0; i<columnCount; i++) {
           num cell = get(0, i);
           if (cell != 0) {
-            num n = cell * _calculateDet(0, i);
+            num n = cell * calculateDet(0, i);
             _determinant = _determinant! + (add? n : -n);
           }
           add = !add;
@@ -425,7 +424,7 @@ class Matrix extends Iteration<num> {
       for (int i=0; i< rowCount; i++) {
         List<num> row = [];
         for (int j=0; j<columnCount; j++) {
-          row.add(_calculateDet(i, j));
+          row.add(calculateDet(i, j));
         }
         newMatrix.add(row);
       }
@@ -437,8 +436,8 @@ class Matrix extends Iteration<num> {
   /// Helper function to build the determinant
   /// that is to replace each item in this [Matrix]
   /// when calculating [cofactor].
-  num _cfact(int row, int column) {
-    num cell = _calculateDet(row, column);
+  num cfact(int row, int column) {
+    num cell = calculateDet(row, column);
     if ((row + column).isEven) return cell;
     return -cell;
   }
@@ -458,7 +457,7 @@ class Matrix extends Iteration<num> {
       for (int i=0; i<rowCount; i++) {
         List<num> row = [];
         for (int j=0; j<columnCount; j++) {
-          row.add(_cfact(i, j));
+          row.add(cfact(i, j));
         }
         newMatrix.add(row);
       }
