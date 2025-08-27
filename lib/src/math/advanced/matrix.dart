@@ -50,20 +50,23 @@ class Matrix extends Iteration<num> {
   @override
   Iterator<num> get sourceIterator => HolderIterator(holder: _matrix);
 
-  Matrix._(this._matrix);
+  /// Builds a [Matrix] where [matrix]
+  /// is used as the list of rows.
+  Matrix(List<List<num>> matrix): this.check(matrix.length, matrix[0].length, matrix);
 
   /// Builds a [Matrix] where [matrix]
   /// is used as the list of rows.
-  factory Matrix(List<List<num>> matrix) {
-    int? columnCount;
-    for (var matrixRow in matrix) {
-      columnCount ??= matrixRow.length;
-      assert(columnCount == matrixRow.length);
-    }
-    assert(columnCount != null);
-
-    return Matrix._(matrix);
-  }
+  ///
+  /// The constructor validates that [matrix]
+  /// has a length of [rows] and each row has
+  /// a length of [cols].
+  Matrix.check(int rows, int cols, List<List<num>> matrix):
+    assert(rows > 0, 'There must be at least one row in a Matrix.'),
+    assert(cols > 0, 'There must be at least one column in a Matrix.'),
+    assert(matrix.length == rows),
+    assert(matrix.every((r) => r.length == cols)),
+    _matrix = matrix
+  ;
 
   /// Builds an empty [Matrix].
   Matrix.empty(): _matrix=[];
