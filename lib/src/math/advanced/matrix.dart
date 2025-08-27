@@ -367,22 +367,167 @@ class Matrix extends Iteration<num> {
     return _identity!;
   }
 
+  /// A helper function to help construct any type
+  /// of row echelon.
+  Matrix _rowEchelonBuild({
+    bool reduced = false,
+    bool pivoting = false,
+    double eps = 1e-12,
+  }) {
+    if (rowCount == 0 || columnCount == 0) return Matrix.empty();
+
+    // Work on a mutable copy
+    final m = copyData();
+
+    int r = 0;    // pivot row
+    int lead = 0; // pivot column
+
+    while (r < rowCount && lead < columnCount) {
+      // --- choose pivot row
+      int pivRow = reduced? -1 : r;
+
+      final int iStart = r + (reduced? 0 : 1);
+      if (pivoting) {
+        // full partial pivoting in this column
+        num best = m[pivRow][lead].abs();
+        for (int i = iStart; i < rowCount; i++) {
+          final v = m[i][lead].abs();
+          if (v > best) { best = v; pivRow = i; }
+        }
+      } else {
+        // order-preserving: only swap if current pivot is ~0
+        if (reduced || m[pivRow][lead].abs() <= eps) {
+          for (int i = iStart; i < rowCount; i++) {
+            if (m[i][lead].abs() > eps) { pivRow = i; break; }
+          }
+        }
+      }
+      
+      // If no pivot found in this column,
+      // or if the column is (numerically) zero (from r downward),
+      // move to next column
+      if (pivRow == -1 || m[pivRow][lead].abs() <= eps) {
+        lead++;
+        continue;
+      }
+
+      // Swap pivot row into position r if needed (only happens when pivot is zero in non-pivoting mode)
+      if (pivRow != r) {
+        final tmp = m[r];
+        m[r] = m[pivRow];
+        m[pivRow] = tmp;
+      }
+
+      final pivot = m[r][lead];
+      if (reduced) {
+        if (pivot.abs() <= eps) { lead++; continue; } // safety
+        // Normalize pivot row so pivot becomes 1
+        for (int j = 0; j < columnCount; j++) {
+          m[r][j] /= pivot;
+        }
+        m[r][lead] = 1.0;
+      }
+
+      // Eliminate entries strictly below the pivot in column `lead`
+      for (int i = reduced? 0 : r + 1; i < rowCount; i++) {
+        if (reduced && i == r) continue;
+        final factor = reduced? m[i][lead] : (pivot.abs() <= eps) ? 0.0 : m[i][lead] / pivot;
+        if (factor.abs() <= eps) {
+          // already ~0; skip work
+          m[i][lead] = 0.0;
+          continue;
+        }
+        // Row_i = Row_i - factor * Row_r  (start at `lead` for cache locality)
+        for (int j = reduced? 0 : lead; j < columnCount; j++) {
+          m[i][j] -= factor * m[r][j];
+          // squash tiny noise
+          if ((!reduced) && m[i][j].abs() <= eps) m[i][j] = 0.0;
+        }
+        if (reduced) m[i][lead] = 0.0;
+      }
+
+      if (reduced) {
+        // Clean small numerical noise
+        for (int j = 0; j < columnCount; j++) {
+          if (m[r][j].abs() <= eps) m[r][j] = 0.0;
+        }
+      }
+
+      // Advance to next row/column (next pivot should be to the right and below)
+      r++;
+      lead++;
+    }
+
+    return Matrix(m);
+  }
+
   Matrix? _rowEchelon;
 
   /// Gets the row echelon of this [Matrix].
+  ///
+  /// {@template math.matrix.rowEchelon}
+  /// Row Echelon Form (REF) that preserves row order when possible.
+  /// - No scaling; just eliminates below each pivot.
+  /// - Only swaps if the current pivot is (numerically) zero.
+  /// {@endtemplate}
   Matrix get rowEchelon {
-    // TODO: Make computation actually work correctly.
-    if (_rowEchelon == null) {
-      List<List<num>> newMatrix = [_matrix[0]];
-      for (int i=1; i<rowCount; i++) {
-        List<num> row = [];
-        for (int j=0; j<columnCount; j++) {
-          row.add(get(i, j) - ((get(i, (i-1)) / (i-1)) * get(i-1, j)));
-        }
-        newMatrix.add(row);
-      }
-      _rowEchelon = Matrix(newMatrix);
-    }
+    _rowEchelon ??= _rowEchelonBuild();
     return _rowEchelon!;
+  }
+
+  Matrix? _reducedRowEchelon;
+
+  /// Gets the reduced row echelon of this [Matrix].
+  ///
+  /// {@template math.matrix.rowEchelon.reduced}
+  /// Reduced Row Echelon Form (RREF).
+  /// - Preserves row order when possible (no swaps unless needed).
+  /// - Scales each pivot row so the pivot is 1.
+  /// - Zeros both *below and above* each pivot.
+  /// {@endtemplate}
+  Matrix get reducedRowEchelon {
+    _reducedRowEchelon ??= _rowEchelonBuild(reduced: true);
+    return _reducedRowEchelon!;
+  }
+
+  int? _rank;
+
+  /// Gets the rank of this [Matrix].
+  ///
+  /// ### What is Rank?
+  ///
+  /// {@template math.matrix.rank}
+  /// The rank is how many of the rows are "unique":
+  /// not made of other rows. (Same for columns.)
+  ///
+  /// In fact the rows and columns always agree on the rank (amazing but true!).
+  ///
+  /// When we talk about rows here, we can also say the same thing about columns.
+  /// So we don't really need to work out both.
+  ///
+  /// With square matrices, a non-zero determinant tells us that all rows (or columns)
+  /// are linearly independent, so it is "full rank" and its rank equals the number of rows.
+  ///
+  /// The rank can't be larger than the smallest dimension of the matrix.
+  /// {@endtemplate}
+  int get rank {
+    if (_rank == null) {
+      if (rowCount == columnCount) {
+        _rank = determinant != 0? rowCount : null;
+      }
+      _rank ??= reducedRowEchelon._matrix.fold<int>(0, (rank, row) {
+        return rank + (row.any((cell) => cell != 0)? 1:0);
+      });
+    }
+    return _rank!;
+  }
+
+  List<List<num>> copyData() {
+    return _matrix.map((r) => List<num>.from(r)).toList();
+  }
+
+  @override
+  String toString() {
+    return 'Matrix(rows: $rowCount, cols: $columnCount, matrix: [${_matrix.join(', ')}])';
   }
 }
