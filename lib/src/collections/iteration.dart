@@ -103,10 +103,8 @@ abstract interface class IterationConstruct<E> {
   ///
   /// Returns -1 if nothing satisfies [test].
   int indexWhere(bool Function(E element) test, [int start = 0]) {
-    for (int i=start; i<length; i++) {
-      if (test(elementAt(i))) {
-        return i;
-      }
+    for (int i=IndexError.check(start, length); i<length; i++) {
+      if (test(elementAt(i))) return i;
     }
     return -1;
   }
@@ -135,10 +133,8 @@ abstract interface class IterationConstruct<E> {
   ///
   /// Returns -1 if nothing satisfies [test].
   int lastIndexWhere(bool Function(E element) test, [int? start]) {
-    for (int i=start ?? (length-1); i>=0; i++) {
-      if (test(elementAt(i))) {
-        return i;
-      }
+    for (int i=IndexError.check(start ?? (length-1), length); i>=0; i++) {
+      if (test(elementAt(i))) return i;
     }
     return -1;
   }
@@ -551,10 +547,8 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   int indexWhere(bool Function(E element) test, [int start = 0]) {
-    for (int i=start; i<length; i++) {
-      if (test(elementAt(i))) {
-        return i;
-      }
+    for (int i=IndexError.check(start, length); i<length; i++) {
+      if (test(elementAt(i))) return i;
     }
     return -1;
   }
@@ -567,10 +561,8 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   int lastIndexWhere(bool Function(E element) test, [int? start]) {
-    for (int i=start ?? (length-1); i>=0; i++) {
-      if (test(elementAt(i))) {
-        return i;
-      }
+    for (int i=IndexError.check(start ?? (length-1), length); i>=0; i++) {
+      if (test(elementAt(i))) return i;
     }
     return -1;
   }
@@ -836,23 +828,26 @@ class IterationItem<E> extends Iteration<E> {
 
 typedef Transformation<S, T> = T Function(S value);
 typedef ExpandFunction<S, T> = Iterable<T> Function(S sourceElement);
+typedef AllowElement<V> = bool Function(V value);
 
 class TransformingIterable<S, T, V> extends Iteration<V> {
   final Iterable<S> _iterable;
   final Transformation<T, V>? _transformer;
   final ExpandFunction<S, T>? _expander;
+  final AllowElement<V>? _allower;
 
   factory TransformingIterable(
     Iterable<S> iterable,
     [
       Transformation<T, V>? transformer,
       ExpandFunction<S, T>? expander,
+      AllowElement<V>? allower,
     ]
   ) {
-    return TransformingIterable<S, T, V>._(iterable, transformer, expander);
+    return TransformingIterable<S, T, V>._(iterable, transformer, expander, allower);
   }
 
-  TransformingIterable._(this._iterable, this._transformer, this._expander);
+  TransformingIterable._(this._iterable, this._transformer, this._expander, this._allower);
 
   V transformer(T value) {
     if (_transformer != null) return _transformer(value);
@@ -862,6 +857,11 @@ class TransformingIterable<S, T, V> extends Iteration<V> {
   Iterable<T> expander(S value) {
     if (_expander != null) return _expander(value);
     return [value as T];
+  }
+
+  bool allowed(V value) {
+    if (_allower != null) return _allower(value);
+    return true;
   }
 
   @override

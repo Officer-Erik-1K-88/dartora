@@ -103,6 +103,7 @@ class TransformingIterator<S, T, V> implements Iterator<V> {
       }
     }
     _current = _iterable.transformer(_currentExpansion!.current);
+    if (!_iterable.allowed(current)) return moveNext();
     return true;
   }
 
