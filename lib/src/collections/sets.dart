@@ -1,5 +1,7 @@
 import 'dart:math' show Random;
 
+import 'iteration.dart';
+
 import 'iterators.dart';
 
 abstract mixin class ListSet<E> implements Set<E>, List<E> {
@@ -336,10 +338,10 @@ abstract mixin class ListSet<E> implements Set<E>, List<E> {
   // mapping
 
   @override
-  Iterable<T> map<T>(T Function(E e) toElement) => MappedIterable<E, T>(this, toElement);
+  Iterable<T> map<T>(T Function(E e) toElement) => TransformingIteration(this, toElement);
 
   @override
-  Iterable<T> expand<T>(Iterable<T> Function(E element) toElements) => ExpandIterable(this, toElements);
+  Iterable<T> expand<T>(Iterable<T> Function(E element) toElements) => TransformingIteration(this, null, toElements);
 
   @override
   ListSet<E> followedBy(Iterable<E> other);
@@ -381,12 +383,16 @@ abstract mixin class ListSet<E> implements Set<E>, List<E> {
   }
 
   @override
-  ListSet<E> where(bool Function(E element) test);
+  Iteration<E> where(bool Function(E element) test) {
+    return TransformingIteration(this, null, null, test);
+  }
 
   // casting
 
   @override
-  ListSet<T> whereType<T>();
+  Iteration<T> whereType<T>() {
+    return TransformingIteration<E, E, E, T>(this, null, null, (elm) => elm is T);
+  }
 
   ListSet<R> cast<R>();
 
@@ -589,17 +595,7 @@ class BaseListSet<E> extends ListSet<E> {
 
   @override
   ListSet<E> take(int count) {
-    return makeCopy(_elements.take(count),);
-  }
-
-  @override
-  ListSet<E> where(bool Function(E element) test) {
-    return makeCopy(_elements.where(test));
-  }
-
-  @override
-  ListSet<T> whereType<T>() {
-    return makeCopy(_elements.whereType<T>());
+    return makeCopy(_elements.take(count));
   }
 
   @override
