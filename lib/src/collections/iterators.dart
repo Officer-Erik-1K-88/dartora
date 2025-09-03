@@ -1,4 +1,4 @@
-import 'iteration.dart' show TransformingIterable;
+import 'iteration.dart' show TransformingIteration;
 
 class IteratorBuild<E> implements Iterator<E> {
   /// The function used to get the elements
@@ -75,8 +75,8 @@ class HolderIterator<E> implements Iterator<E> {
   }
 }
 
-class TransformingIterator<S, T, V> implements Iterator<V> {
-  final TransformingIterable<S, T, V> _iterable;
+class TransformingIterator<S, T, V, R> implements Iterator<R> {
+  final TransformingIteration<S, T, V, R> _iterable;
   final Iterator<S> _iterator;
 
   // Initialize _currentExpansion to an empty iterable. A null value
@@ -85,8 +85,9 @@ class TransformingIterator<S, T, V> implements Iterator<V> {
   Iterator<T>? _currentExpansion = const EmptyIterator<Never>();
   V? _current;
 
-
   TransformingIterator(this._iterable, this._iterator);
+
+  V get curr => _current as V;
 
   @override
   bool moveNext() {
@@ -103,12 +104,12 @@ class TransformingIterator<S, T, V> implements Iterator<V> {
       }
     }
     _current = _iterable.transformer(_currentExpansion!.current);
-    if (!_iterable.allowed(current)) return moveNext();
+    if (!_iterable.allowed(curr)) return moveNext();
     return true;
   }
 
   @override
-  V get current => _current as V;
+  R get current => curr as R;
 }
 
 /// The always empty iterator.

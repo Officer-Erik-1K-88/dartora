@@ -670,7 +670,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
 
   @override
   Iteration<T> map<T>(T Function(E e) toElement) {
-    return TransformingIterable(this, toElement);
+    return TransformingIteration(this, toElement);
   }
 
   @override
@@ -682,7 +682,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   Iteration<T> expand<T>(Iterable<T> Function(E element) toElements) {
-    return TransformingIterable(this, null, toElements);
+    return TransformingIteration(this, null, toElements);
   }
   
   @override
@@ -698,7 +698,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
     return IterationItem(
       source: this,
       startIndex: start,
-      indexTake: length - end,
+      indexTake: end,
     );
   }
   
@@ -752,32 +752,19 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   Iteration<E> where(bool Function(E element) test) {
-    List<E> newI = [];
-    for (int i=0; i < length; i++) {
-      E elm = elementAt(i);
-      if (test(elm)) {
-        newI.add(elm);
-      }
-    }
-    return IterationItem(
-      source: newI,
-    );
+    return TransformingIteration(this, null, null, test);
   }
 
   // Setting to other type
   
   @override
   Iteration<T> whereType<T>() {
-    return IterationItem(
-      source: toList().whereType<T>(),
-    );
+    return TransformingIteration<E, E, E, T>(this, null, null, (elm) => elm is T);
   }
 
   @override
   Iteration<R> cast<R>() {
-    return IterationItem(
-      source: toList().cast<R>(),
-    );
+    return TransformingIteration<E, E, E, R>(this);
   }
 
   @override
@@ -830,13 +817,13 @@ typedef Transformation<S, T> = T Function(S value);
 typedef ExpandFunction<S, T> = Iterable<T> Function(S sourceElement);
 typedef AllowElement<V> = bool Function(V value);
 
-class TransformingIterable<S, T, V> extends Iteration<V> {
+class TransformingIteration<S, T, V, R> extends Iteration<R> {
   final Iterable<S> _iterable;
   final Transformation<T, V>? _transformer;
   final ExpandFunction<S, T>? _expander;
   final AllowElement<V>? _allower;
 
-  factory TransformingIterable(
+  factory TransformingIteration(
     Iterable<S> iterable,
     [
       Transformation<T, V>? transformer,
@@ -844,10 +831,10 @@ class TransformingIterable<S, T, V> extends Iteration<V> {
       AllowElement<V>? allower,
     ]
   ) {
-    return TransformingIterable<S, T, V>._(iterable, transformer, expander, allower);
+    return TransformingIteration<S, T, V, R>._(iterable, transformer, expander, allower);
   }
 
-  TransformingIterable._(this._iterable, this._transformer, this._expander, this._allower);
+  TransformingIteration._(this._iterable, this._transformer, this._expander, this._allower);
 
   V transformer(T value) {
     if (_transformer != null) return _transformer(value);
@@ -871,10 +858,10 @@ class TransformingIterable<S, T, V> extends Iteration<V> {
   int get indexTake => 0;
   
   @override
-  Iterator<V> get sourceIterator => TransformingIterator<S, T, V>(this, this._iterable.iterator);
+  Iterator<R> get sourceIterator => TransformingIterator<S, T, V, R>(this, this._iterable.iterator);
 
   @override
-  Iterator<V> get iterator => TransformingIterator<S, T, V>(this, this._iterable.iterator);
+  Iterator<R> get iterator => TransformingIterator<S, T, V, R>(this, this._iterable.iterator);
 }
 
 class ImmutableIterationHolder<E> extends Iteration<E> {
@@ -1324,23 +1311,13 @@ abstract class IterationBase<E> extends Iteration<E> implements List<E> {
   Iteration<E> take(int count) {
     return IterationList(
       iterable: this,
-      indexTake: count,
+      indexTake: length - count,
     );
   }
 
-  // Setting to other type
-  
-  @override
-  IterationBase<T> whereType<T>() {
-    return IterationList(
-      iterable: toList().whereType<T>(),
-    );
-  }
-
-  @override
   IterationBase<R> cast<R>() {
     return IterationList(
-      iterable: toList().cast<R>(),
+      iterable: List.castFrom<E, R>(this),
     );
   }
 }
@@ -1495,44 +1472,7 @@ class IterationList<E> extends IterationBase<E> {
       iterable: newI,
     );
   }
-  
-  @override
-  Iteration<E> skip(int count) {
-    return IterationList(
-      iterable: _listSource,
-      startIndex: startIndex+count,
-      indexTake: indexTake,
-    );
-  }
 
-  @override
-  Iteration<E> take(int count) {
-    return IterationList(
-      iterable: _listSource,
-      startIndex: startIndex,
-      indexTake: indexTake+count,
-    );
-  }
-
-  // Setting to other type
-  
-  @override
-  IterationBase<T> whereType<T>() {
-    return IterationList(
-      iterable: _listSource.whereType<T>(),
-      startIndex: startIndex,
-      indexTake: indexTake,
-    );
-  }
-
-  @override
-  IterationBase<R> cast<R>() {
-    return IterationList(
-      iterable: _listSource.cast<R>(),
-      startIndex: startIndex,
-      indexTake: indexTake,
-    );
-  }
 }
 
 class IterationHolder<E> extends IterationBase<E> {
