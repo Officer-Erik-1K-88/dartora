@@ -351,14 +351,11 @@ abstract interface class IterationConstruct<E> {
   /// otherwise it iterates the remaining elements in their original order,
   /// starting with the first element for which `test(element)` returns `false`.
   IterationConstruct<E> skipWhile(bool Function(E value) test) {
-    int count = length;
-    for (int i=0; i<length; i++) {
-      if (!test(elementAt(i))) {
-        count = i;
-        break;
-      }
+    int i=0;
+    while (test(elementAt(i))) {
+      i++;
     }
-    return skip(count);
+    return skip(i);
   }
   
   /// Creates a lazy iterable of the [count] first elements of this iterable.
@@ -381,14 +378,11 @@ abstract interface class IterationConstruct<E> {
   /// element is found where `test(element)` is false. At that point,
   /// the returned iterable stops (its `moveNext()` returns false).
   IterationConstruct<E> takeWhile(bool Function(E value) test) {
-    int count = length;
-    for (int i=0; i<length; i++) {
-      if (!test(elementAt(i))) {
-        count = i;
-        break;
-      }
+    int i=0;
+    while (test(elementAt(i))) {
+      i++;
     }
-    return take(length - count);
+    return take(i);
   }
 
   // Setting to other type
@@ -740,34 +734,28 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   Iteration<E> skipWhile(bool Function(E value) test) {
-    int count = length;
-    for (int i=0; i<length; i++) {
-      if (!test(elementAt(i))) {
-        count = i;
-        break;
-      }
+    int i=0;
+    while (test(elementAt(i))) {
+      i++;
     }
-    return skip(count);
+    return skip(i);
   }
   
   @override
   Iteration<E> take(int count) {
     return IterationItem(
       source: this,
-      indexTake: count,
+      indexTake: length - count,
     );
   }
   
   @override
   Iteration<E> takeWhile(bool Function(E value) test) {
-    int count = length;
-    for (int i=0; i<length; i++) {
-      if (!test(elementAt(i))) {
-        count = i;
-        break;
-      }
+    int i=0;
+    while (test(elementAt(i))) {
+      i++;
     }
-    return take(length - count);
+    return take(i);
   }
   
   @override
