@@ -1,3 +1,5 @@
+import 'iteration.dart' show TransformingIterable;
+
 class IteratorBuild<E> implements Iterator<E> {
   /// The function used to get the elements
   /// at the index position of [current].
@@ -70,5 +72,51 @@ class HolderIterator<E> implements Iterator<E> {
       if (_outerIndex >= _holder.length) return false;
     }
     return true;
+  }
+}
+
+class TransformingIterator<S, T, V> implements Iterator<V> {
+  final TransformingIterable<S, T, V> _iterable;
+  final Iterator<S> _iterator;
+
+  // Initialize _currentExpansion to an empty iterable. A null value
+  // marks the end of iteration, and we don't want to call _f before
+  // the first moveNext call.
+  Iterator<T>? _currentExpansion = const EmptyIterator<Never>();
+  V? _current;
+
+
+  TransformingIterator(this._iterable, this._iterator);
+
+  @override
+  bool moveNext() {
+    if (_currentExpansion == null) return false;
+    while (!_currentExpansion!.moveNext()) {
+      _current = null;
+      if (_iterator.moveNext()) {
+        // If _f throws, this ends iteration. Otherwise _currentExpansion and
+        // _current will be set again below.
+        _currentExpansion = null;
+        _currentExpansion = _iterable.expander(_iterator.current).iterator;
+      } else {
+        return false;
+      }
+    }
+    _current = _iterable.transformer(_currentExpansion!.current);
+    return true;
+  }
+
+  @override
+  V get current => _current as V;
+}
+
+/// The always empty iterator.
+class EmptyIterator<E> implements Iterator<E> {
+  const EmptyIterator();
+  @override
+  bool moveNext() => false;
+  @override
+  E get current {
+    throw StateError("No element");
   }
 }

@@ -684,9 +684,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
 
   @override
   Iteration<T> map<T>(T Function(E e) toElement) {
-    return IterationItem(
-      source: toList().map<T>(toElement),
-    );
+    return TransformingIterable(this, toElement);
   }
 
   @override
@@ -698,9 +696,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
   
   @override
   Iteration<T> expand<T>(Iterable<T> Function(E element) toElements) {
-    return IterationItem(
-      source: toList().expand<T>(toElements),
-    );
+    return TransformingIterable(this, null, toElements);
   }
   
   @override
@@ -848,6 +844,49 @@ class IterationItem<E> extends Iteration<E> {
   E sourceGet(int sourceIndex) {
     return source.elementAt(sourceIndex);
   }
+}
+
+typedef Transformation<S, T> = T Function(S value);
+typedef ExpandFunction<S, T> = Iterable<T> Function(S sourceElement);
+
+class TransformingIterable<S, T, V> extends Iteration<V> {
+  final Iterable<S> _iterable;
+  final Transformation<T, V>? _transformer;
+  final ExpandFunction<S, T>? _expander;
+
+  factory TransformingIterable(
+    Iterable<S> iterable,
+    [
+      Transformation<T, V>? transformer,
+      ExpandFunction<S, T>? expander,
+    ]
+  ) {
+    return TransformingIterable<S, T, V>._(iterable, transformer, expander);
+  }
+
+  TransformingIterable._(this._iterable, this._transformer, this._expander);
+
+  V transformer(T value) {
+    if (_transformer != null) return _transformer(value);
+    return value as V;
+  }
+
+  Iterable<T> expander(S value) {
+    if (_expander != null) return _expander(value);
+    return [value as T];
+  }
+
+  @override
+  int get startIndex => 0;
+
+  @override
+  int get indexTake => 0;
+  
+  @override
+  Iterator<V> get sourceIterator => TransformingIterator<S, T, V>(this, this._iterable.iterator);
+
+  @override
+  Iterator<V> get iterator => TransformingIterator<S, T, V>(this, this._iterable.iterator);
 }
 
 class ImmutableIterationHolder<E> extends Iteration<E> {
@@ -1248,24 +1287,9 @@ abstract class IterationBase<E> extends Iteration<E> implements List<E> {
   // Mapping
 
   @override
-  Iteration<T> map<T>(T Function(E e) toElement) {
-    return IterationList(
-      iterable: toList().map(toElement),
-    );
-  }
-
-  @override
   Iteration<E> followedBy(Iterable<E> other) {
     List<E> newI = toList();
     newI.addAll(other);
-    return IterationList(
-      iterable: newI,
-    );
-  }
-  
-  @override
-  Iteration<T> expand<T>(Iterable<T> Function(E element) toElements) {
-    Iterable<T> newI = toList().expand<T>(toElements);
     return IterationList(
       iterable: newI,
     );
