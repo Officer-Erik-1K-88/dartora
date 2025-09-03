@@ -675,9 +675,7 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
 
   @override
   Iteration<E> followedBy(Iterable<E> other) {
-    return IterationItem(
-      source: toList().followedBy(other),
-    );
+    return TransformingIteration(this, null, null, null, other);
   }
   
   @override
@@ -694,18 +692,17 @@ abstract mixin class Iteration<E> implements IterationConstruct<E>, Iterable<E> 
 
   @override
   Iteration<E> getRange(int start, int end) {
-    assert(start >= 0 && end >= start && length >= end);
+    RangeError.checkValidRange(start, end, length);
     return IterationItem(
       source: this,
       startIndex: start,
-      indexTake: end,
+      indexTake: length - (end - start),
     );
   }
   
   @override
   Iteration<E> sublist(int start, [int? end]) {
-    assert(start >= 0 && length >= start && (end == null || (end >= start && length >= end)));
-    end ??= length;
+    end = RangeError.checkValidRange(start, end, length);
 
     List<E> newI = [];
     for (int i=start; i < end; i++) {
@@ -822,6 +819,7 @@ class TransformingIteration<S, T, V, R> extends Iteration<R> {
   final Transformation<T, V>? _transformer;
   final ExpandFunction<S, T>? _expander;
   final AllowElement<V>? _allower;
+  final Iterable<R>? _follows;
 
   factory TransformingIteration(
     Iterable<S> iterable,
@@ -829,12 +827,13 @@ class TransformingIteration<S, T, V, R> extends Iteration<R> {
       Transformation<T, V>? transformer,
       ExpandFunction<S, T>? expander,
       AllowElement<V>? allower,
+      Iterable<R>? follows,
     ]
   ) {
-    return TransformingIteration<S, T, V, R>._(iterable, transformer, expander, allower);
+    return TransformingIteration<S, T, V, R>._(iterable, transformer, expander, allower, follows);
   }
 
-  TransformingIteration._(this._iterable, this._transformer, this._expander, this._allower);
+  TransformingIteration._(this._iterable, this._transformer, this._expander, this._allower, this._follows);
 
   V transformer(T value) {
     if (_transformer != null) return _transformer(value);
@@ -850,6 +849,8 @@ class TransformingIteration<S, T, V, R> extends Iteration<R> {
     if (_allower != null) return _allower(value);
     return true;
   }
+
+  Iterator<R>? get followingIterator => _follows?.iterator;
 
   @override
   int get startIndex => 0;
@@ -1262,15 +1263,6 @@ abstract class IterationBase<E> extends Iteration<E> implements List<E> {
   // Mapping
 
   @override
-  Iteration<E> followedBy(Iterable<E> other) {
-    List<E> newI = toList();
-    newI.addAll(other);
-    return IterationList(
-      iterable: newI,
-    );
-  }
-
-  @override
   IterationBase<E> operator +(List<E> other) {
     Iterable<E> newI = toList() + other;
     return IterationList(
@@ -1296,22 +1288,6 @@ abstract class IterationBase<E> extends Iteration<E> implements List<E> {
     }
     return IterationList(
       iterable: newI,
-    );
-  }
-  
-  @override
-  Iteration<E> skip(int count) {
-    return IterationList(
-      iterable: this,
-      startIndex: count,
-    );
-  }
-  
-  @override
-  Iteration<E> take(int count) {
-    return IterationList(
-      iterable: this,
-      indexTake: length - count,
     );
   }
 
@@ -2023,7 +1999,7 @@ abstract class IterationMap<K, V> extends IterationConstruct<V> implements Map<K
     return IterationItemMap(
       map: this,
       startIndex: start,
-      indexTake: length - end,
+      indexTake: length - (end - start),
     );
   }
 

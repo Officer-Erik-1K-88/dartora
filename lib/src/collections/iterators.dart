@@ -78,20 +78,31 @@ class HolderIterator<E> implements Iterator<E> {
 class TransformingIterator<S, T, V, R> implements Iterator<R> {
   final TransformingIteration<S, T, V, R> _iterable;
   final Iterator<S> _iterator;
+  final Iterator<R>? _follower;
 
   // Initialize _currentExpansion to an empty iterable. A null value
   // marks the end of iteration, and we don't want to call _f before
   // the first moveNext call.
   Iterator<T>? _currentExpansion = const EmptyIterator<Never>();
   V? _current;
+  R? _endingCurrent;
 
-  TransformingIterator(this._iterable, this._iterator);
+  TransformingIterator(this._iterable, this._iterator): _follower = _iterable.followingIterator;
 
   V get curr => _current as V;
 
   @override
   bool moveNext() {
-    if (_currentExpansion == null) return false;
+    if (_currentExpansion == null) {
+      _endingCurrent = null;
+      if (_follower != null) {
+        if (_follower.moveNext()) {
+          _endingCurrent = _follower.current;
+          return true;
+        }
+      }
+      return false;
+    }
     while (!_currentExpansion!.moveNext()) {
       _current = null;
       if (_iterator.moveNext()) {
@@ -109,7 +120,7 @@ class TransformingIterator<S, T, V, R> implements Iterator<R> {
   }
 
   @override
-  R get current => curr as R;
+  R get current => _endingCurrent ?? (curr as R);
 }
 
 /// The always empty iterator.
